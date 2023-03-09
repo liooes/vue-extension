@@ -70,6 +70,19 @@
                       </el-select>
                     </el-form-item>
                   </el-col>
+                  <el-col :span="10">
+                     <el-form-item label="单号">
+                       <el-input v-model="form.number" placeholder="请输入单号" style="width:400px;"/>
+                     </el-form-item>
+                   </el-col>  
+                   <el-col :span="1"> 
+                    <el-form-item label="创建时间">
+                      <el-date-picker v-model="value2" type="daterange" unlink-panels range-separator="To"
+                        start-placeholder="Start date" end-placeholder="End date" :shortcuts="shortcuts" :size="large" style="width:290px"/>
+                    </el-form-item>
+                  </el-col>  
+                </el-row> 
+                 <el-row>
                   <el-col :span="6">
                     <el-form-item label="问题类别">
                       <el-select v-model="form.type" placeholder="请选择问题类别">
@@ -87,35 +100,22 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="6">
-                    <el-form-item label="创建时间">
-                      <el-date-picker v-model="form.createTime" type="date" placeholder="选择日期"></el-date-picker>
-                    </el-form-item>
-                  </el-col>
-                </el-row>
-                <el-row>
-
-                  <el-col :span="6">
                     <el-form-item label="交互对象">
                       <el-select v-model="form.interaction" placeholder="请选择交互对象">
                         <el-option v-for="item in options" :key="item.value" :label="item.label"
                           :value="item.value"></el-option>
                       </el-select>
                     </el-form-item>
-                  </el-col>
+                  </el-col>  
                   <el-col :span="6">
                     <el-form-item label="回复状态">
                       <el-select v-model="form.replyStatus" placeholder="请选择回复状态">
                         <el-option v-for="item in options" :key="item.value" :label="item.label"
                           :value="item.value"></el-option>
                       </el-select>
-                    </el-form-item>
+                    </el-form-item> 
                   </el-col>
-                  <el-col :span="6">
-                    <el-form-item label="单号" :span="16">
-                      <el-input v-model="form.number" placeholder="请输入单号" style="width: 530px;" />
-                    </el-form-item>
-                  </el-col>
-                </el-row>
+                 </el-row> 
                 <el-row>
                   <el-col>
                     <el-form-item class="btn">
@@ -124,6 +124,7 @@
                       <el-button type="primary">完结工单</el-button>
                       <el-button type="primary">重开工单</el-button>
                       <el-button type="primary">修改状态</el-button>
+                      <el-button type="primary">搜索工单</el-button>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -146,9 +147,43 @@
 </template>
 
 <script>
+
+//日期控件，一段时间
+const pkvla = [
+  {
+    text: 'Last week',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+      return [start, end]
+    },
+  },
+  {
+    text: 'Last month',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+      return [start, end]
+    },
+  },
+  {
+    text: 'Last 3 months',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+      return [start, end]
+    },
+  },
+]
+
 export default {
   data() {
     return {
+      value2:'',
+      shortcuts:pkvla,
       activeIndex: '1',
       activeName: 'WorkOrderList',
       form: {

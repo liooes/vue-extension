@@ -7,6 +7,11 @@
 4. element ui
 5. chrome ext
 
+## nodejs + vue cli安装
+
+1. https://nodejs.org/en/download/
+2. npm install -g @vue/cli
+
 ## vscode不能运行终端命令可以尝试这个办法
 1. 以管理员身份打开vscode，任意打开一个终端，快捷键 ctrl+`
 2. 输入：get-ExecutionPolicy。显示Restricted，说明vscode被禁止运行脚本
