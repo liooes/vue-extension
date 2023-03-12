@@ -179,6 +179,51 @@ const pkvla = [
   },
 ]
 
+//回复状态
+const rs = [
+  { value: 'customer', label: '当日未跟进' },
+  { value: '', label: '全部' },
+]
+
+//交互对象
+const it = [
+  { value: 'customer', label: '客户' },
+  { value: 'carrier', label: '承运商' },
+  { value: 'warehouse', label: '仓库' },
+  { value: '', label: '全部' },
+]
+
+//问题类别
+const ic = [
+  { value: 'LOGISTICS', label: '在途异常' },
+  { value: 'CUSTOMER', label: '客户原因' },
+  { value: 'ITEM', label: '货损货差' },
+]
+
+//问题类型
+const type = [
+  { value: '催派', label: '催派' },
+  { value: '签收未收', label: '签收未收' },
+  { value: '无物流信息', label: '无物流信息' },
+  { value: '超区', label: '超区' },
+  { value: '双面单', label: '双面单' },
+
+  { value: '截件/拒收', label: '截件/拒收' },
+  { value: '修改信息', label: '修改信息' },
+  { value: '无法联系', label: '无法联系' },
+  { value: '商品质量问题', label: '商品质量问题' },
+  { value: '下单信息错误', label: '下单信息错误' },
+
+  { value: '包裹丢失', label: '包裹丢失' },
+  { value: '破损', label: '破损' },
+  { value: '货物短少', label: '货物短少' },
+  { value: '错发', label: '错发' },
+  { value: '优派遗失', label: '优派遗失' },
+  { value: '多发', label: '多发' },
+]
+
+const pj = [{ value: "1", label: "项目1" }, { value: "2", label: "项目2" }, { value: "3", label: "项目3" }];
+
 export default {
   data() {
     return {
@@ -203,10 +248,31 @@ export default {
     };
   },
   methods: {
-    onSelect(index) {
-      this.activeIndex = index;
+    //问题类别联动
+    handleChange(val) {
+      this.issueType = ''
+      switch (val) {
+        case 'ALL':
+          this.issueTypeOptions = all;
+          break
+        case 'LOGISTICS':
+          this.issueTypeOptions = LOGISTICS;
+          break
+        case 'CUSTOMER':
+          this.issueTypeOptions = CUSTOMER;
+          break
+        case 'ITEM':
+          this.issueTypeOptions = ITEM;
+          break
+        default:
+          this.issueTypeOptions = []
+          break
+      }
+      // 这里改变默认选中第0个数据
+      this.issueType = this.issueTypeOptions[0].value
     }
   }
+}
 };
 </script>
 
