@@ -19,7 +19,7 @@
                     </el-col>
                     <el-col :span="12">
                         <el-form-item label="单号:">
-                            <el-input v-model="ordernumber" placeholder="Please input number..." clearable effect="dark"/>
+                            <el-input v-model="ordernumber" placeholder="Please input number..." clearable effect="dark" />
                         </el-form-item>
                     </el-col>
                     <el-col :span="6">
@@ -94,7 +94,7 @@
 <script>
 import axios from 'axios'
 import qs from 'qs'
-import { ref } from 'vue' 
+import { ref } from 'vue'
 
 const project = ref('')
 const ordernumber = ref('')
@@ -183,6 +183,13 @@ const all = [
 ]
 //获取所有项目api
 const getprojectAPI = "https://newem.800best.com/ajax/company-user/user/data-access/OMS/PROJECT?_=1677845529256";
+
+// 通知定时100毫秒进行清理
+setTimeout(function (e) {
+    // 这里的id只要和创建的时候设置id值一样就行了，就可以清理对应id的通知了
+    chrome.notifications.clear("id");
+}, 100);
+
 export default {
     data() {
         return {
@@ -217,6 +224,7 @@ export default {
         this.issueClassify = this.issueClassifyOptions[0].value;
         this.issueTypeOptions = all;
         this.issueType = this.issueTypeOptions[0].value;
+        //加载所有项目
         this.getProject();
     },
     methods: {
@@ -245,18 +253,39 @@ export default {
         },
         //获取所有项目
         getProject() {
-            const temp=[ { value: 1, label: '全部' }]
+            const temp = [{ value: 1, label: '全部' }]
             axios.get(getprojectAPI).then(res => {
-                for (var i = 0; i < res.data.data.length; i++) {
-                    temp.push({
-                        value: res.data.data[i].id,
-                        label: res.data.data[i].name
-                    })
+                if (res.data.success === true) {
+                    for (var i = 0; i < res.data.data.length; i++) {
+                        temp.push({
+                            value: res.data.data[i].id,
+                            label: res.data.data[i].name
+                        })
+                    }
+                    //将获取到的所有项目赋值给项目列表
+                    this.projectOptions = temp;
+                    this.desktopnotification("项目加载完毕，默认选中全部项目~");
+                    console.log(projectOptions)
+                    //设置默认选择全部
+                    this.project = this.projectOptions[0];
+                } else {
+                    this.desktopnotification(res.data.toString()) 
+                    console.log(res)
                 }
-                this.projectOptions = temp;
-                console.log(projectOptions)
-                //设置默认选择全部
-                this.project = this.projectOptions[0];
+            }).catch(error => {
+                     this.desktopnotification(error.toString()) 
+                     console.log(error);
+            })
+
+        }, 
+        //桌面通知
+        desktopnotification(msg) {
+            chrome.notifications.create("id", {
+                requireInteraction:false,//通知是否保持可见，默认false,
+                type: 'basic',
+                title: ' ',  // 这里我故意使显示这个为空，显得没那么拥挤
+                message: msg,
+                iconUrl: './best16.png'
             });
         },
     },
