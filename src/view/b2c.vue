@@ -7,77 +7,76 @@
             </el-col>
         </el-row>
         <el-row class="orderquery">
-            <el-col >
-                    <el-row>
-                        <el-col :span="6">
-                            <el-form-item label="客户项目:">
-                                <el-select v-model="project" placeholder="请选择项目">
-                                    <el-option v-for="item in projectOptions" :key="item.value" :label="item.label"
-                                        :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="单号:">
-                                <el-input v-model="input" placeholder="Please input number..." clearable
-                                />
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="创建时间:">
-                                <el-date-picker v-model="createtime" type="daterange" unlink-panels range-separator="To"
-                                    start-placeholder="Start date" end-placeholder="End date" :shortcuts="shortcuts"
-                                    :size="small" :default-value="createtimedefaultvalue" :disabled="true" readonly
-                                    style="width:250px" />
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col :span="6">
-                            <el-form-item label="问题类别:">
-                                <el-select v-model="issueClassify" placeholder="请选择问题类别" @change="handleChange">
-                                    <el-option v-for="item in issueClassifyOptions" :key="item.value" :label="item.label"
-                                        :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="问题类型:">
-                                <el-select v-model="issueType" placeholder="请选择问题类型">
-                                    <el-option v-for="item in issueTypeOptions" :key="item.value" :label="item.label"
-                                        :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="交互对象:">
-                                <el-select v-model="interactTarget" placeholder="请选择交互对象">
-                                    <el-option v-for="item in interactTargetOptions" :key="item.value" :label="item.label"
-                                        :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-form-item label="回复状态:">
-                                <el-select v-model="replystatus" placeholder="请选择回复状态">
-                                    <el-option v-for="item in replystatusOptions" :key="item.value" :label="item.label"
-                                        :value="item.value"></el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
-                    <el-row>
-                        <el-col>
-                            <el-form-item class="btn">
-                                <el-button type="primary">发送信息</el-button>
-                                <el-button type="primary">修改类型</el-button>
-                                <el-button>完结工单</el-button>
-                                <el-button type="primary">重开工单</el-button>
-                                <el-button type="primary">修改状态</el-button>
-                                <el-button type="primary">搜索工单</el-button>
-                            </el-form-item>
-                        </el-col>
-                    </el-row>
+            <el-col>
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="客户项目:">
+                            <el-select v-model="project" placeholder="请选择项目">
+                                <el-option v-for="item in projectOptions" :key="item.value" :label="item.label"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="12">
+                        <el-form-item label="单号:">
+                            <el-input v-model="ordernumber" placeholder="Please input number..." clearable effect="dark"/>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="创建时间:">
+                            <el-date-picker v-model="createtime" type="daterange" unlink-panels range-separator="To"
+                                start-placeholder="Start date" end-placeholder="End date" :shortcuts="shortcuts"
+                                :size="small" :default-value="createtimedefaultvalue" :disabled="true" readonly
+                                style="width:250px" />
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="6">
+                        <el-form-item label="问题类别:">
+                            <el-select v-model="issueClassify" placeholder="请选择问题类别" @change="handleChange">
+                                <el-option v-for="item in issueClassifyOptions" :key="item.value" :label="item.label"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="问题类型:">
+                            <el-select v-model="issueType" placeholder="请选择问题类型">
+                                <el-option v-for="item in issueTypeOptions" :key="item.value" :label="item.label"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="交互对象:">
+                            <el-select v-model="interactTarget" placeholder="请选择交互对象">
+                                <el-option v-for="item in interactTargetOptions" :key="item.value" :label="item.label"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="6">
+                        <el-form-item label="回复状态:">
+                            <el-select v-model="replystatus" placeholder="请选择回复状态">
+                                <el-option v-for="item in replystatusOptions" :key="item.value" :label="item.label"
+                                    :value="item.value"></el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col>
+                        <el-form-item class="btn">
+                            <el-button type="primary">发送信息</el-button>
+                            <el-button type="primary">修改类型</el-button>
+                            <el-button>完结工单</el-button>
+                            <el-button type="primary">重开工单</el-button>
+                            <el-button type="primary">修改状态</el-button>
+                            <el-button type="primary" @click="getProject">搜索工单</el-button>
+                        </el-form-item>
+                    </el-col>
+                </el-row>
             </el-col>
         </el-row>
     </div>
@@ -93,7 +92,19 @@
 </template>
 
 <script>
-//日期控件，一段时间
+import axios from 'axios'
+import qs from 'qs'
+import { ref } from 'vue' 
+
+const project = ref('')
+const ordernumber = ref('')
+const issueClassify = ref('')
+const issueType = ref('')
+const interactTarget = ref('')
+const replystatus = ref('')
+
+// const [project, ordernumber, issueClassify, issueType, interactTarget, replystatus] = Array.from({length: 6}, () => ref(''))
+//创建日期，左侧快速选择日期
 const pkvla = [
     {
         text: 'Last week',
@@ -124,9 +135,7 @@ const pkvla = [
     },
 ]
 //项目
-const pjOptions = [
-    { value: '', label: '全部' },
-]
+const projectOptions = []
 //回复状态
 const rsOptions = [
     { value: '', label: '全部' },
@@ -172,28 +181,31 @@ const ITEM = [
 const all = [
     { value: '', label: '全部' },
 ]
-
+//获取所有项目api
+const getprojectAPI = "https://newem.800best.com/ajax/company-user/user/data-access/OMS/PROJECT?_=1677845529256";
 export default {
     data() {
         return {
+            //单号
+            ordernumber,
             //项目
-            project: '',
-            projectOptions: pjOptions,
+            project,
+            projectOptions,
             //问题类别
-            issueClassify: '',
+            issueClassify,
             issueClassifyOptions: icOptions,
             //问题类型
-            issueType: '',
+            issueType,
             issueTypeOptions: [],
             //创建时间
             createtime: [],
             //创建时间默认值
             createtimedefaultvalue: [new Date(new Date().getTime() - 3600 * 24 * 1000 * 90), new Date()],
             //交互对象
-            interactTarget: '',
+            interactTarget,
             interactTargetOptions: itOptions,
             //回复状态
-            replystatus: '',
+            replystatus,
             replystatusOptions: rsOptions,
             //创建日期，左侧快速选择日期
             shortcuts: pkvla,
@@ -205,6 +217,7 @@ export default {
         this.issueClassify = this.issueClassifyOptions[0].value;
         this.issueTypeOptions = all;
         this.issueType = this.issueTypeOptions[0].value;
+        this.getProject();
     },
     methods: {
         //问题类别联动
@@ -229,7 +242,23 @@ export default {
             }
             // 这里改变默认选中第0个数据
             this.issueType = this.issueTypeOptions[0].value
-        }
+        },
+        //获取所有项目
+        getProject() {
+            const temp=[ { value: 1, label: '全部' }]
+            axios.get(getprojectAPI).then(res => {
+                for (var i = 0; i < res.data.data.length; i++) {
+                    temp.push({
+                        value: res.data.data[i].id,
+                        label: res.data.data[i].name
+                    })
+                }
+                this.projectOptions = temp;
+                console.log(projectOptions)
+                //设置默认选择全部
+                this.project = this.projectOptions[0];
+            });
+        },
     },
     mounted() {
     }
@@ -258,7 +287,8 @@ export default {
     margin-top: 0;
     color: #767676;
 }
-.orderquery .el-col{
+
+.orderquery .el-col {
     padding-left: 10px;
     padding-right: 10px;
 }

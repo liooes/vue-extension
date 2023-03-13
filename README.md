@@ -1,11 +1,12 @@
 # 利用Vue3 + Element UI 开发 chrome extension
 
-## 所需开发环境
+## 所需开发环境和依赖
 1. nodejs
 2. vue cli
 3. vs code
 4. element ui
 5. chrome ext
+6. axios
 
 ## nodejs + vue cli安装
 
@@ -29,6 +30,14 @@ vue add chrome-extension-cli
 ### 安装element plus依赖
 ```
 npm install element-plus --save
+```
+### 安装axios依赖
+```
+npm install axios
+```
+### 安装querystring依赖
+```
+npm install --save querystring
 ```
 ### 引入ElementPlus 在 popup.js 引入
 ```
