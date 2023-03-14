@@ -73,22 +73,41 @@
                             <el-button>完结工单</el-button>
                             <el-button type="primary">重开工单</el-button>
                             <el-button type="primary">修改状态</el-button>
-                            <el-button type="primary" @click="getProject">搜索工单</el-button>
+                            <el-button type="primary" @click="searchOrder">搜索工单</el-button>
                         </el-form-item>
                     </el-col>
+                    </el-row>
+                    </el-col>
                 </el-row>
-            </el-col>
-        </el-row>
-    </div>
-    <div class="el-tabs-orders">
-        <!-- 标签页 -->
-        <el-tabs type="border-card">
-            <el-tab-pane label="待处理">User</el-tab-pane>
-            <el-tab-pane label="处理中">Config</el-tab-pane>
-            <el-tab-pane label="判责中">Role</el-tab-pane>
-            <el-tab-pane label="已完结">Task</el-tab-pane>
-        </el-tabs>
-    </div>
+                </div>
+                    <div class="el-tabs-orders">
+                        <!-- 标签页 -->
+                        <el-tabs type="card" v-model="activeTabs" @tab-change="tabchange">
+                            <el-tab-pane label="我的关注" name="a"> 
+                                我的关注
+                            </el-tab-pane>
+                            <el-tab-pane label="已挂起" name="b">
+                                已挂起
+                            </el-tab-pane>
+                            <el-tab-pane v-bind:label="waitprocesslabel" name="c">
+                                <el-table :data="tableData" stripe border  style="width: 100%;" >
+                                    <el-table-column sortable align="center" prop="emCode" label="工单号" width="180" />
+                                    <el-table-column sortable align="center" prop="numbers" label="单号" width="260" > </el-table-column>
+                                    <el-table-column sortable align="center" prop="projectName" label="项目" />
+                                    <el-table-column sortable align="center" prop="interactTarget" label="交互对象" />
+                                    <el-table-column sortable align="center" prop="expressInfo" label="快递信息" />
+                                    <el-table-column sortable align="center" prop="workOrderSubInfo" label="工单提交信息" /> 
+                                </el-table>
+                            </el-tab-pane>
+                            <el-tab-pane label="处理中" name="d">处理中</el-tab-pane>
+                            <el-tab-pane label="判责中" name="e">判责中</el-tab-pane>
+                            <el-tab-pane label="已完结" name="f">已完结</el-tab-pane>
+                    </el-tabs>
+                </div>
+                <div>
+                    <!-- <span>共 {{ ordercount }} 项</span> -->
+                    <el-pagination class="elpagination" background :page-size="10" disabled layout="prev, pager, next, jumper" :total="1000" />
+                </div>
 </template>
 
 <script>
@@ -102,6 +121,13 @@ const issueClassify = ref('')
 const issueType = ref('')
 const interactTarget = ref('')
 const replystatus = ref('')
+const activeTabs = ref('')
+const tableData = ref([])
+
+const waitprocesslabel = ref('待处理(0)')
+
+// const ordercount = ref('0')
+
 
 // const [project, ordernumber, issueClassify, issueType, interactTarget, replystatus] = Array.from({length: 6}, () => ref(''))
 //创建日期，左侧快速选择日期
@@ -183,7 +209,166 @@ const all = [
 ]
 //获取所有项目api
 const getprojectAPI = "https://newem.800best.com/ajax/company-user/user/data-access/OMS/PROJECT?_=1677845529256";
+//获取工单列表
+const getPageListAPI = "https://newem.800best.com/ajax/em/b2c/judge/getPageList";
+//获取工单数量
+const getNumListAPI = "https://newem.800best.com/ajax/em/b2c/judge/getNumList ";
 
+//获取待处理工单数量
+const getNumListData = {
+    projectCode: "",
+    creator: null,
+    finisher: null,
+    interactTarget: "",
+    issueClassify: "",
+    issueType: "",
+    logisticsProviderCode: "",
+    robotInService: 11,
+    multiPackage: "",
+    onlyHangUpFlag: true,
+    statusList: [
+        "waitprocess"
+    ],
+    showColor: "0",
+    showColorFlag: "false",
+    showColorServicer: "0",
+    showColorServicerFlag: "false",
+    tradeScreenshot: "0",
+    tradeScreenshotFlag: "false",
+    returnScreenshot: "0",
+    returnScreenshotFlag: "false",
+    servicerOnly: "false",
+    credit: "false",
+    dutyFlag: "false",
+    awaitApprove: null,
+    signFlag: null,
+    replyInterceptFlag: null,
+    todayNotFollowFlag: null,
+    orderSource: "0",
+    createTimeBegin: "",
+    createTimeEnd: "",
+    statusFlag: true,
+    handler: null,
+    dealBeforeToday: false,
+    dealToday: false
+}
+//待处理工单请求内容
+const waitprocessOrderData = {
+                        draw: 21,
+                        columns: [{
+                            data: "id",
+                            name: "",
+                            searchable: true,
+                            orderable: false,
+                            search: {
+                                value: "",
+                                regex: false
+                            }
+                        },
+                        {
+                            data: "emCode",
+                            name: "",
+                            searchable: true,
+                            orderable: false,
+                            search: {
+                                value: "",
+                                regex: false
+                            }
+                        },
+                        {
+                            data: "mixOrderCode",
+                            name: "",
+                            searchable: true,
+                            orderable: false,
+                            search: {
+                                value: "",
+                                regex: false
+                            }
+                        },
+                        {
+                            data: "projectName",
+                            name: "",
+                            searchable: true,
+                            orderable: false,
+                            search: {
+                                value: "",
+                                regex: false
+                            }
+                        },
+                        {
+                            data: "interactTarget",
+                            name: "",
+                            searchable: true,
+                            orderable: false,
+                            search: {
+                                value: "",
+                                regex: false
+                            }
+                        },
+                        {
+                            data: "deliveryInformation",
+                            name: "",
+                            searchable: true,
+                            orderable: false,
+                            search: {
+                                value: "",
+                                regex: false
+                            }
+                        },
+                        {
+                            data: "creatorInfo",
+                            name: "",
+                            searchable: true,
+                            orderable: false,
+                            search: {
+                                value: "",
+                                regex: false
+                            }
+                        }],
+                        order: [],
+                        start: 0,
+                        length: 500,
+                        search: {
+                            value: "",
+                            regex: false
+                        },
+                        so: {
+                            projectCode: "",
+                            keywords: "",
+                            creator: null,
+                            finisher: null,
+                            interactTarget: "",
+                            issueClassify: "",
+                            issueType: "",
+                            logisticsProviderCode: "",
+                            robotInService: 11,
+                            multiPackage: "",
+                            onlyHangUpFlag: true,
+                            statusList: ["waitprocess"],
+                            showColor: "0",
+                            showColorFlag: "false",
+                            showColorServicer: "0",
+                            showColorServicerFlag: "false",
+                            tradeScreenshot: "0",
+                            tradeScreenshotFlag: "false",
+                            returnScreenshot: "0",
+                            returnScreenshotFlag: "false",
+                            servicerOnly: "false",
+                            credit: false,
+                            dutyFlag: "false",
+                            awaitApprove: null,
+                            signFlag: "false",
+                            replyInterceptFlag: "false",
+                            todayNotFollowFlag: "false",
+                            orderSource: "0",
+                            createTimeBegin: "2022-12-14 00:00:00",
+                            createTimeEnd: "2023-03-14 23:59:59",
+                            statusFlag: true,
+                            handler: null,
+                            dealBeforeToday: false,
+                            dealToday: false
+                        } 
+}
 // 通知定时100毫秒进行清理
 setTimeout(function (e) {
     // 这里的id只要和创建的时候设置id值一样就行了，就可以清理对应id的通知了
@@ -193,6 +378,14 @@ setTimeout(function (e) {
 export default {
     data() {
         return {
+            // 待处理工单数量
+            waitprocesslabel,
+            //工单数量
+            // ordercount,
+            //处理状态选项
+            activeTabs,
+            //待处理表格容器
+            tableData,
             //单号
             ordernumber,
             //项目
@@ -228,6 +421,61 @@ export default {
         this.getProject();
     },
     methods: {
+        //切换不同的标签加载对应的数据
+        tabchange(){
+            //切换标签清空所有表格的数据
+            this.tableData = []
+            //加载对应标签数据
+            switch (activeTabs.value) {
+                case 'a':
+                    //加载我的关注数据
+                    console.log('加载我的关注数据',activeTabs.value)
+                    break;
+                case 'b':
+                    console.log('加载已挂起数据',activeTabs.value)
+                    break;
+                    case 'c':
+                    //加载待处理数据
+                    console.log('加载待处理数据', activeTabs.value)
+                    //获取待处理工单数量
+                    this.getNumList();
+                    this.getwaitprocessOrder(); 
+                    break;
+                case 'd':
+                    console.log('加载处理中数据',activeTabs.value)
+                    break;
+                case 'e':
+                    console.log('加载判责中数据',activeTabs.value)
+                    break;
+                case 'f':
+                    console.log('加载已完结数据',activeTabs.value)
+                    break;
+                default:
+                    console.log('没有选择处理状态...')
+                    break;
+            }
+        },
+        //将日期转换为指定字符串日期格式
+        formatDate(startStr, endStr) {
+            // 将日期对象转换为指定格式的字符串
+            const startStr1 = startStr.toLocaleString('chinese', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/(\d{4})\/(\d{2})\/(\d{2})/, '$1-$2-$3');
+            const endStr1 = endStr.toLocaleString('chinese', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/(\d{4})\/(\d{2})\/(\d{2})/, '$1-$2-$3');
+            // 将时分秒部分设置为 0
+            const startTime = startStr1.substring(0, 10) + ' 00:00:00';
+            const endTime = endStr1.substring(0, 10) + ' 00:00:00';
+            return [startTime, endTime];
+        },
+        //将时间戳转为字符串
+        timestampToDateString(timestamp) {
+            const date = new Date(timestamp)
+            const year = date.getFullYear()
+            const month = date.getMonth() + 1
+            const day = date.getDate()
+            const hour = date.getHours()
+            const minute = date.getMinutes()
+            const second = date.getSeconds()
+            return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`
+        },
         //问题类别联动
         handleChange(val) {
             this.issueType = ''
@@ -281,12 +529,90 @@ export default {
         //桌面通知
         desktopnotification(msg) {
             chrome.notifications.create("id", {
-                requireInteraction:false,//通知是否保持可见，默认false,
+                requireInteraction: false,//通知是否保持可见，默认false,
                 type: 'basic',
                 title: ' ',  // 这里我故意使显示这个为空，显得没那么拥挤
                 message: msg,
                 iconUrl: './best16.png'
             });
+        },
+        //搜索工单
+        searchOrder() {
+            this.tabchange();
+        },
+        //获取待处理工单并赋值到tableData
+        getwaitprocessOrder(){
+            //设置时间,获取选中的日期，赋值到获取待处理工单data里
+            const times = this.formatDate(this.createtime[0],this.createtime[1]);
+            waitprocessOrderData.so.createTimeBegin= times[0];
+            waitprocessOrderData.so.createTimeEnd= times[1];
+            console.log('修改后的时间',waitprocessOrderData.so)
+
+            axios.post(getPageListAPI, waitprocessOrderData, {
+                headers: { "Content-Type": "application/json; charset=UTF-8" }
+            })
+                .then(res => {
+                    if (res.data.success === true) {
+                        const temp = []
+                        // this.tableData = temp
+                        for (let i = 0; i < res.data.data.length; i++) {
+                            temp.push({
+                                //工单号
+                                emCode: res.data.data[i].emCode,
+
+                                //单号{订单号，客户单号，外部单号} numbers
+                                numbers:
+                                    "订单号: " + res.data.data[i].orderCode,
+                                // "客户单号: " + res.data.data[i].refOrderCode +
+                                // "外部单号: " + res.data.data[i].outerCode,
+
+                                //项目
+                                projectName: res.data.data[i].projectName,
+                                //交互对象
+                                interactTarget:
+                                    res.data.data[i].interactTarget === 'carrier' ? '承运商' :
+                                        res.data.data[i].interactTarget === 'customer' ? '客户' :
+                                            res.data.data[i].interactTarget === 'warehouser' ? '仓库' :
+                                                '未知',
+
+                                //快递信息 expressInfo
+                                // expressInfo:res.data.data[i].logisticsProviderName+
+                                expressInfo: res.data.data[i].shippingOrderNo,
+
+                                //工单提交信息 workOrderSubInfo
+                                workOrderSubInfo:
+                                    // res.data.data[i].updatorName +
+                                    this.timestampToDateString(res.data.data[i].lastUpdateTime)
+                            })
+                        }
+                        this.tableData = temp;
+                        console.log('Response:', res.data);
+                    } else {
+                        this.notifications(res.data.success)
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        },
+        //获取工单数量
+        getNumList(){
+            //设置时间,获取选中的日期，赋值到获取工单数量data里
+            const times = this.formatDate(this.createtime[0],this.createtime[1]);
+            getNumListData.createTimeBegin = times[0];
+            getNumListData.createTimeEnd = times[1];
+             
+            axios.post(getNumListAPI,getNumListData,{
+                headers: { "Content-Type": "application/json; charset=UTF-8" }
+            })
+                .then(res =>{
+                    //将结果赋值到tabs
+                    this.waitprocesslabel = "待处理" + "(" + res.data.data[2] + ")";//待处理的下标
+                    console.log(res)
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         },
     },
     mounted() {
@@ -296,6 +622,11 @@ export default {
 
 
 <style scoped>
+
+.elpagination{
+    float: right;
+    padding-top: 20px;
+}
 .btn {
     float: right;
     margin-right: 20px;
