@@ -48,6 +48,46 @@ lastUpdateTime : 1678792574000
 | 问题类型 |issueType|
 | 交互对象 |interactTarget|
 | 回复状态 |replystatus|
+### 处理中需要解析的响应数据
+|prop|value|
+|:---|:---|
+| 工单号| emCode|
+| 单号|orderCode |
+| 项目|projectName |
+| 最新处理时间| lastUpdateTime |
+| 交互对象|interactTarget |
+| 快递信息|shippingOrderNo |
+| 工单提交信息| createTime |
+| 最新处理信息| currentContent |
+
+**工单提交信息是工单创建时间和工单创建人**
+
+### 判责待确认需要解析的响应数据
+|prop|value|
+|:---|:---|
+| 工单号| emCode|
+| 单号|orderCode |
+| 项目|projectName |
+| 最新处理时间| lastUpdateTime |
+| 交互对象|interactTarget |
+| 快递信息|shippingOrderNo |
+| 工单提交信息| createTime |
+| 最新处理信息| currentOperation |
+
+**判责待确认工单显示只有最新处理信息和处理中工单不一样，其他的一样**
+
+### 已完结需要解析的响应数据
+|prop|value|
+|:---|:---|
+| 工单号| emCode|
+| 单号|orderCode |
+| 项目|projectName |
+| 交互对象|interactTarget |
+| 快递信息|shippingOrderNo |
+| 工单提交信息| createTime |
+| 工单完结时间| lastUpdateTime |
+
+
 
 
 
