@@ -81,8 +81,17 @@
         </el-row>
     </div>
     <!-- 标签页 -->
-    <div class="el-tabs-orders">
+    <div class="el-tabs-orders"> 
         <el-tabs type="card" v-model="activeTabs" @tab-change="tabchange">
+            <!-- 显示数量 -->
+            <div class="pagesize">
+                <!-- <el-form-item label="显示数量"> -->
+                    <el-select v-model="pagesize" placeholder="请选择数量" size="defalut" style="width:80px" @change="tabchange">
+                        <el-option v-for="item in pagesizeOptions" :key="item.value" :label="item.label" :value="item.value"/>
+                    </el-select>
+                <!-- </el-form-item> -->
+            </div>
+            <!-- 工单表格 -->
             <el-tab-pane v-bind:label="followlabel" name="a">
                 我的关注
             </el-tab-pane>
@@ -90,7 +99,7 @@
                 已挂起
             </el-tab-pane>
             <el-tab-pane v-bind:label="waitprocesslabel" name="c">
-                <el-table :data="tableData" stripe border style="width: 100%;">
+                <el-table :data="tableDatawaitprocess" stripe border style="width: 100%;">
                     <el-table-column sortable align="center" prop="emCode" label="工单号" width="180" />
                     <el-table-column sortable align="center" prop="numbers" label="单号" width="260"> </el-table-column>
                     <el-table-column sortable align="center" prop="projectName" label="项目" />
@@ -139,8 +148,12 @@
     <!-- 分页 -->
     <div class="elpagination">
         <!-- <span>共 {{ ordercount }} 项</span> -->
-        <el-pagination background :page-size="10" disabled layout="prev, pager, next, jumper"
-            :total="1000" />
+        <el-pagination background layout="prev, pager, next"
+        :pager-count="6" 
+        :page-size="pagesize" 
+        :total="pagetotal" 
+        @current-change="pagechange"
+         />
     </div>
 </template>
 
@@ -165,8 +178,24 @@ const replystatus = ref('')
 //标签选项
 const activeTabs = ref('c')
 
-//待处理表格
-const tableData = ref([])
+//分页总数 = 获取到的工单数量 / 选择显示的数量
+//分页总数需要向上取整
+// Math.ceil(需要向上取整的数); 
+//选择数量
+const pagesize = ref('')
+const pagesizeOptions = [
+    { value:10,label:'10' },
+    { value:100,label:'100' },
+    { value:500,label:'500' },
+]
+
+//工单状态数量列表
+//下标值：我的关注，已挂起，待处理，处理中，判责中，已完结
+// 0,1,2,3,4,5
+var numlistData = [  ]
+
+//待处理表格数据
+const tableDatawaitprocess = ref([])
 //处理中表格数据
 const tableDataprocessing = ref([])
 //判责待确认表格数据
@@ -180,9 +209,6 @@ const waitprocesslabel = ref('待处理(0)')
 const processinglabel = ref('处理中(0)')
 const unconfirmlabel = ref('判责中(0)')
 const finishlabel = ref('已完结(0)')
-
-// const ordercount = ref('0')
-
 
 // const [project, ordernumber, issueClassify, issueType, interactTarget, replystatus] = Array.from({length: 6}, () => ref(''))
 //创建日期，左侧快速选择日期
@@ -227,7 +253,7 @@ const itOptions = [
     { value: '', label: '全部' },
     { value: 'customer', label: '客户' },
     { value: 'carrier', label: '承运商' },
-    { value: 'warehouse', label: '仓库' },
+    { value: 'warehouser', label: '仓库' },
 ]
 //问题类别
 const icOptions = [
@@ -408,6 +434,12 @@ const processOrderData = {
     order: [
 
     ],
+    //从第N条数据开始获取，[10,25,50,75,100,200,400,500]
+    //sample 
+    //选择10
+    //start = (当前页数 - 1 ) * 10
+    //选择25
+    //start = (当前页数 - 1) * 25
     start: 0,
     length: 500,
     search: {
@@ -843,6 +875,13 @@ setTimeout(function (e) {
 export default {
     data() {
         return {
+            //工单数量列表
+            numlistData,
+            //每页显示的数量
+            pagesize,
+            pagesizeOptions,
+            //分页控件数量总数
+            pagetotal:0,
             // 我的关注工单数量显示
             followlabel,
             suspendedlabel,
@@ -850,12 +889,10 @@ export default {
             processinglabel,
             unconfirmlabel,
             finishlabel,
-            //工单数量
-            // ordercount,
             //处理状态选项
             activeTabs,
             //待处理表格容器
-            tableData,
+            tableDatawaitprocess,
             //处理中表格容器
             tableDataprocessing,
             //判责待确认表格容器
@@ -894,6 +931,7 @@ export default {
         this.issueTypeOptions = all;
         this.issueType = this.issueTypeOptions[0].value;
         this.replystatus = this.replystatusOptions[0].value;
+        this.pagesize = this.pagesizeOptions[0].value;
         //加载所有项目
         this.getProject();
     },
@@ -901,13 +939,13 @@ export default {
         //切换不同的标签加载对应的数据
         tabchange() {
             //切换标签清空所有表格的数据
-            this.tableData = []
-            //切换标签清空处理中表格数据
+            this.tableDatawaitprocess = []
             this.tableDataprocessing = []
-
+            this.tableDataunconfirm = []
+            this.tableDatafinish = []
             //获取工单数量
             this.getNumList();
-            console.log('getNumListData', getNumListData)
+           
             //加载对应标签数据
             switch (activeTabs.value) {
                 case 'a': {
@@ -1008,11 +1046,11 @@ export default {
                     // this.project = this.projectOptions[0];
                 } else {
                     this.desktopnotification(res.data.toString())
-                    console.log(res)
+                    console.log('获取所有项目的响应',res)
                 }
             }).catch(error => {
                 this.desktopnotification(error.toString())
-                console.log(error);
+                console.log('获取所有项目的响应',error);
             })
 
         },
@@ -1030,8 +1068,31 @@ export default {
         searchOrder() {
             this.tabchange();
         },
+        //设置请求数据
+        setrequestData(requestOrderData) {
+            //设置要搜索的数量
+            requestOrderData.length = pagesize.value;
+            //设置选中的项目
+            requestOrderData.so.projectCode = project.value;
+            //快递单号有100条限制，
+            requestOrderData.so.keywords = ordernumber.value;
+            //设置选中的问题类型
+            requestOrderData.so.issueClassify = issueClassify.value;
+            requestOrderData.so.issueType = issueType.value;
+            requestOrderData.so.interactTarget = interactTarget.value;
+            //设置当日未跟进状态
+            requestOrderData.so.todayNotFollowFlag = replystatus.value;
+            //设置时间,获取选中的日期，赋值到获取待处理工单data里
+            const times = this.formatDate(this.createtime[0], this.createtime[1]);
+            requestOrderData.so.createTimeBegin = times[0];
+            requestOrderData.so.createTimeEnd = times[1];
+            console.log('修改后的时间', requestOrderData.so)
+
+
+        },
         //获取工单数量
         getNumList() {
+            // this.setrequestData(getNumListData);
             //设置选中的项目
             getNumListData.projectCode = project.value;
             //快递单号有100条限制，
@@ -1051,6 +1112,7 @@ export default {
                 headers: { "Content-Type": "application/json; charset=UTF-8" }
             })
                 .then(res => {
+                    numlistData = [];
                     //将结果赋值到tabs
                     this.followlabel = "我的关注" + "(" + res.data.data[0] + ")";//待处理的下标
                     this.suspendedlabel = "已挂起" + "(" + res.data.data[1] + ")";//待处理的下标
@@ -1058,30 +1120,34 @@ export default {
                     this.processinglabel = "处理中" + "(" + res.data.data[3] + ")";//待处理的下标
                     this.unconfirmlabel = "判责中" + "(" + res.data.data[4] + ")";//待处理的下标
                     this.finishlabel = "已完结" + "(" + res.data.data[5] + ")";//待处理的下标
-                    console.log(res)
+                    //将数量保存到工单数量列表里
+                    numlistData = res.data.data;
+                     //设置分页控件总条数
+                    this.setpagetotal(res.data.data);
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('获取工单数量', error);
                 });
         },
-        //获取待处理工单并赋值到tableData
+        //获取待处理工单
         getwaitprocessOrder() {
-            //设置选中的项目
-            waitprocessOrderData.so.projectCode = project.value;
-            //快递单号有100条限制，
-            waitprocessOrderData.so.keywords = ordernumber.value;
-            //设置选中的问题类型
-            waitprocessOrderData.so.issueClassify = issueClassify.value;
-            waitprocessOrderData.so.issueType = issueType.value;
-            waitprocessOrderData.so.interactTarget = interactTarget.value;
-            //设置当日未跟进状态
-            waitprocessOrderData.so.todayNotFollowFlag = replystatus.value;
-            //设置时间,获取选中的日期，赋值到获取待处理工单data里
-            const times = this.formatDate(this.createtime[0], this.createtime[1]);
-            waitprocessOrderData.so.createTimeBegin = times[0];
-            waitprocessOrderData.so.createTimeEnd = times[1];
-            console.log('修改后的时间', waitprocessOrderData.so)
-
+            this.setrequestData(waitprocessOrderData);
+            // //设置选中的项目
+            // waitprocessOrderData.so.projectCode = project.value;
+            // //快递单号有100条限制，
+            // waitprocessOrderData.so.keywords = ordernumber.value;
+            // //设置选中的问题类型
+            // waitprocessOrderData.so.issueClassify = issueClassify.value;
+            // waitprocessOrderData.so.issueType = issueType.value;
+            // waitprocessOrderData.so.interactTarget = interactTarget.value;
+            // //设置当日未跟进状态
+            // waitprocessOrderData.so.todayNotFollowFlag = replystatus.value;
+            // //设置时间,获取选中的日期，赋值到获取待处理工单data里
+            // const times = this.formatDate(this.createtime[0], this.createtime[1]);
+            // waitprocessOrderData.so.createTimeBegin = times[0];
+            // waitprocessOrderData.so.createTimeEnd = times[1];
+            // console.log('修改后的时间', waitprocessOrderData.so)
+            
             axios.post(getPageListAPI, waitprocessOrderData, {
                 headers: { "Content-Type": "application/json; charset=UTF-8" }
             })
@@ -1117,34 +1183,35 @@ export default {
                                     this.timestampToDateString(res.data.data[i].createTime)
                             })
                         }
-                        this.tableData = temp;
-                        console.log('Response:', res.data);
+                        this.tableDatawaitprocess = temp;
+                        console.log('获取待处理工单Response:', res.data);
                     } else {
                         this.notifications(res.data.success)
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('获取待处理工单Error:', error);
                 });
         },
         //获取前处理中工单
         getprocessOrder(){
             //替换请求内容，实现数据筛选
-            //设置选中的项目
-            processOrderData.so.projectCode = project.value;
-            //快递单号有100条限制，
-            processOrderData.so.keywords = ordernumber.value;
-            //设置选中的问题类型
-            processOrderData.so.issueClassify = issueClassify.value;
-            processOrderData.so.issueType = issueType.value;
-            processOrderData.so.interactTarget = interactTarget.value;
-            //设置当日未跟进状态
-            processOrderData.so.todayNotFollowFlag = replystatus.value;
-            //设置时间,获取选中的日期，赋值到获取待处理工单data里
-            const times = this.formatDate(this.createtime[0], this.createtime[1]);
-            processOrderData.so.createTimeBegin = times[0];
-            processOrderData.so.createTimeEnd = times[1];
-            console.log('修改后的时间', processOrderData.so)
+            this.setrequestData(processOrderData);
+            // //设置选中的项目
+            // processOrderData.so.projectCode = project.value;
+            // //快递单号有100条限制，
+            // processOrderData.so.keywords = ordernumber.value;
+            // //设置选中的问题类型
+            // processOrderData.so.issueClassify = issueClassify.value;
+            // processOrderData.so.issueType = issueType.value;
+            // processOrderData.so.interactTarget = interactTarget.value;
+            // //设置当日未跟进状态
+            // processOrderData.so.todayNotFollowFlag = replystatus.value;
+            // //设置时间,获取选中的日期，赋值到获取待处理工单data里
+            // const times = this.formatDate(this.createtime[0], this.createtime[1]);
+            // processOrderData.so.createTimeBegin = times[0];
+            // processOrderData.so.createTimeEnd = times[1];
+            // console.log('修改后的时间', processOrderData.so)
 
 
             axios.post(getPageListAPI,processOrderData,{
@@ -1180,20 +1247,21 @@ export default {
         //获取判责待确认工单
         getunconfirmOrder(){
             //替换请求内容，实现数据筛选
-            //设置选中的项目
-            unconfirmOrderData.so.projectCode = project.value;
-            //快递单号有100条限制，
-            unconfirmOrderData.so.keywords = ordernumber.value;
-            //设置选中的问题类型
-            unconfirmOrderData.so.issueClassify = issueClassify.value;
-            unconfirmOrderData.so.issueType = issueType.value;
-            unconfirmOrderData.so.interactTarget = interactTarget.value;
-            //设置当日未跟进状态
-            unconfirmOrderData.so.todayNotFollowFlag = replystatus.value;
-            //设置时间,获取选中的日期，赋值到获取待处理工单data里
-            const times = this.formatDate(this.createtime[0], this.createtime[1]);
-            unconfirmOrderData.so.createTimeBegin = times[0];
-            unconfirmOrderData.so.createTimeEnd = times[1];
+            this.setrequestData(unconfirmOrderData);
+            // //设置选中的项目
+            // unconfirmOrderData.so.projectCode = project.value;
+            // //快递单号有100条限制，
+            // unconfirmOrderData.so.keywords = ordernumber.value;
+            // //设置选中的问题类型
+            // unconfirmOrderData.so.issueClassify = issueClassify.value;
+            // unconfirmOrderData.so.issueType = issueType.value;
+            // unconfirmOrderData.so.interactTarget = interactTarget.value;
+            // //设置当日未跟进状态
+            // unconfirmOrderData.so.todayNotFollowFlag = replystatus.value;
+            // //设置时间,获取选中的日期，赋值到获取待处理工单data里
+            // const times = this.formatDate(this.createtime[0], this.createtime[1]);
+            // unconfirmOrderData.so.createTimeBegin = times[0];
+            // unconfirmOrderData.so.createTimeEnd = times[1];
 
             axios.post(getPageListAPI,unconfirmOrderData,{
                 headers:{
@@ -1229,20 +1297,21 @@ export default {
         //获取已完结工单
         getfinishOrder(){
             //替换请求内容，实现数据筛选
-            //设置选中的项目
-            finishOrderdata.so.projectCode = project.value;
-            //快递单号有100条限制，
-            finishOrderdata.so.keywords = ordernumber.value;
-            //设置选中的问题类型
-            finishOrderdata.so.issueClassify = issueClassify.value;
-            finishOrderdata.so.issueType = issueType.value;
-            finishOrderdata.so.interactTarget = interactTarget.value;
-            //设置当日未跟进状态
-            finishOrderdata.so.todayNotFollowFlag = replystatus.value;
-            //设置时间,获取选中的日期，赋值到获取待处理工单data里
-            const times = this.formatDate(this.createtime[0], this.createtime[1]);
-            finishOrderdata.so.createTimeBegin = times[0];
-            finishOrderdata.so.createTimeEnd = times[1];
+            this.setrequestData(finishOrderdata);
+            // //设置选中的项目
+            // finishOrderdata.so.projectCode = project.value;
+            // //快递单号有100条限制，
+            // finishOrderdata.so.keywords = ordernumber.value;
+            // //设置选中的问题类型
+            // finishOrderdata.so.issueClassify = issueClassify.value;
+            // finishOrderdata.so.issueType = issueType.value;
+            // finishOrderdata.so.interactTarget = interactTarget.value;
+            // //设置当日未跟进状态
+            // finishOrderdata.so.todayNotFollowFlag = replystatus.value;
+            // //设置时间,获取选中的日期，赋值到获取待处理工单data里
+            // const times = this.formatDate(this.createtime[0], this.createtime[1]);
+            // finishOrderdata.so.createTimeBegin = times[0];
+            // finishOrderdata.so.createTimeEnd = times[1];
 
             axios.post(getPageListAPI,finishOrderdata,{
                 headers:{
@@ -1269,8 +1338,109 @@ export default {
                 this.tableDatafinish = temp;
             })
             .catch(error =>{
-                console.log(error);
+                console.log('获取已完结工单',error);
             })
+        },
+        //设置分页控件总数
+        setpagetotal(){
+            //分页总数 = 获取到的工单数量 / 选择显示的数量
+            //分页总数需要向上取整
+            // Math.ceil(需要向上取整的数);
+            
+            //数据总条数 pagetotal
+            //每页显示数量 pagesize
+            //工单状态数量列表 numlistData
+            //下标值：我的关注，已挂起，待处理，处理中，判责中，已完结
+            // var temp = Math.ceil(numlistData[2] / pagesize.value);
+            //根据选中的标签设置分页的总条数
+            //加载对应标签数据
+            switch (activeTabs.value) {
+                case 'a': {
+                    //加载我的关注数据
+                    console.log('加载我的关注数据', activeTabs.value)
+                    this.pagetotal = numlistData[0];
+                    break;
+                }
+                case 'b': {
+                    console.log('加载已挂起数据', activeTabs.value)
+                    this.pagetotal = numlistData[1];
+                    break;
+                }
+                case 'c': {
+                    //加载待处理数据
+                    console.log('加载待处理数据', activeTabs.value);
+                    this.pagetotal = numlistData[2];
+                    break;
+                }
+                case 'd': {
+                    console.log('加载处理中数据', activeTabs.value)
+                    this.pagetotal = numlistData[3];
+                    break;
+                }
+                case 'e': {
+                    console.log('加载判责中数据', activeTabs.value)
+                    this.pagetotal = numlistData[4];
+                    break;
+                }
+                case 'f': {
+                    this.getfinishOrder();
+                    console.log('加载已完结数据', activeTabs.value)
+                    this.pagetotal = numlistData[5];
+                    break;
+                }
+                default: {
+                    console.log('没有选择处理状态,无法设置分页总数值...')
+                    break;
+                }
+            }
+        },
+        //页面改变，加载对应标签，对应位置tableData数据
+        pagechange(val){
+             //加载对应标签数据
+             switch (activeTabs.value) {
+                case 'a': {
+                    //加载我的关注数据
+                    console.log('加载我的关注数据', activeTabs.value)
+                    break;
+                }
+                case 'b': {
+                    console.log('加载已挂起数据', activeTabs.value)
+                    break;
+                }
+                case 'c': {
+                    //加载待处理数据
+                    //设置待处理起始位
+                    waitprocessOrderData.start = (val - 1) * pagesize.value;
+                    this.getwaitprocessOrder();
+                    console.log('加载待处理数据', activeTabs.value);
+                    break;
+                }
+                case 'd': {
+                    //设置处理中起始位
+                    processOrderData.start = (val - 1) * pagesize.value;
+                    this.getprocessOrder();
+                    console.log('加载处理中数据', activeTabs.value)
+                    break;
+                }
+                case 'e': {
+                    //设置判责待确认起始位
+                    unconfirmOrderData.start = (val - 1) * pagesize.value;
+                    this.getunconfirmOrder();
+                    console.log('加载判责中数据', activeTabs.value)
+                    break;
+                }
+                case 'f': {
+                    //设置已完结起始位
+                    finishOrderdata.start = (val - 1) * pagesize.value;
+                    this.getfinishOrder();
+                    console.log('加载已完结数据', activeTabs.value)
+                    break;
+                }
+                default: {
+                    console.log('没有选择处理状态...')
+                    break;
+                }
+            }
         }
     },
     mounted() {
@@ -1280,6 +1450,9 @@ export default {
 
 
 <style scoped>
+.pagesize{
+    padding-bottom: 8px;
+}
 .elpagination {
     float: right;
     padding-top: 20px;
