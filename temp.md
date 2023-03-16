@@ -87,6 +87,29 @@ lastUpdateTime : 1678792574000
 | 工单提交信息| createTime |
 | 工单完结时间| lastUpdateTime |
 
+### 页面出现两个滚动条的问题
+![两个滚动条](https://raw.githubusercontent.com/liooes/images/main/markdown20230317020607.png)
+**这是由于子容器高度大于父容器则会显示滚动条**
+**解决方案**
+1. 将父容器滚动条隐藏，在父容器页面添加以下代码
+```
+   <style>
+      body{
+          overflow: hidden;
+      }
+    /style>
+```
+### element plus的backTop控件没有响应原因
+```
+ <el-backtop 
+        target=".page-main"
+        :visibility-height=0
+        :right="45" 
+        :bottom="80"
+        style="background-color:#545C64;color: aliceblue;">
+    </el-backtop>
+```
+**target**	触发滚动的对象，这个参数要写，非常重要！！！就是根据这个参数的数值做响应
 
 
 

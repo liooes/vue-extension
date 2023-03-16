@@ -81,15 +81,13 @@
         </el-row>
     </div>
     <!-- 标签页 -->
-    <div class="el-tabs-orders"> 
+    <div class="el-tabs-orders">     
         <el-tabs type="card" v-model="activeTabs" @tab-change="tabchange">
             <!-- 显示数量 -->
             <div class="pagesize">
-                <!-- <el-form-item label="显示数量"> -->
-                    <el-select v-model="pagesize" placeholder="请选择数量" size="defalut" style="width:80px" @change="tabchange">
+                    <el-select v-model="pagesize" placeholder="请选择数量" size="defalut" style="width:80px" @change="pagesizechange">
                         <el-option v-for="item in pagesizeOptions" :key="item.value" :label="item.label" :value="item.value"/>
                     </el-select>
-                <!-- </el-form-item> -->
             </div>
             <!-- 工单表格 -->
             <el-tab-pane v-bind:label="followlabel" name="a">
@@ -144,10 +142,9 @@
                 </el-table>
             </el-tab-pane>
         </el-tabs>
-    </div>
+    </div> 
     <!-- 分页 -->
     <div class="elpagination">
-        <!-- <span>共 {{ ordercount }} 项</span> -->
         <el-pagination background layout="prev, pager, next"
         :pager-count="6" 
         :page-size="pagesize" 
@@ -155,6 +152,14 @@
         @current-change="pagechange"
          />
     </div>
+    <!-- 回到顶部 -->
+    <el-backtop 
+        target=".page-main"
+        :visibility-height=0
+        :right="45" 
+        :bottom="80"
+        style="background-color:#545C64;color: aliceblue;">
+    </el-backtop>
 </template>
 
 <script>
@@ -1441,7 +1446,14 @@ export default {
                     break;
                 }
             }
-        }
+        },
+        //pagesize change update tableData
+        pagesizechange(){
+            this.tabchange();
+        },
+        top(){
+            console.log('top')
+        },
     },
     mounted() {
     }
@@ -1450,6 +1462,7 @@ export default {
 
 
 <style scoped>
+ 
 .pagesize{
     padding-bottom: 8px;
 }
@@ -1465,6 +1478,8 @@ export default {
 
 .box-border {
     border: 1px solid #ddd;
+    margin: 0; 
+    padding: 0;
 }
 
 .el-tabs-orders {

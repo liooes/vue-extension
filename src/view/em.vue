@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper">
+  <div class="page-wrapper" >
     <!-- header -->
     <el-header class="page-header">
       <div class="page-logo">
@@ -11,7 +11,7 @@
       <!-- 左侧导航 -->
       <el-aside class="page-aside" width="200px">
         <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu" default-active="1"
-          text-color="#fff" @select="handleSelect" >
+          text-color="#fff" @select="handleSelect">
           <el-menu-item index="1">
             <el-icon><icon-menu /></el-icon>
             <span>B2C工单</span>
@@ -41,11 +41,12 @@
         </el-menu>
       </el-aside>
       <!-- 右侧内容 -->
-      <el-main class="page-main">
+      <el-main class="page-main"> 
         <component :is="compName"></component>
       </el-main>
     </el-container>
   </div>
+  
 </template>
 
 <script>
@@ -61,15 +62,15 @@ export default {
     };
   },
   mounted() {
-  this.compName = b2c
-},
+    this.compName = b2c
+  },
   methods: {
-    handleSelect(index) { 
+    handleSelect(index) {
       switch (index) {
         case '1':
           this.compName = b2c
           break
-          case '2':
+        case '2':
           this.compName = anomalyDetection
           break
         case '3':
@@ -88,50 +89,64 @@ export default {
 </script>
 
 <style scoped>
-
 .page-wrapper {
   background-color: #f5f7fa;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+
 }
 
 .page-header {
   padding: 0;
-  background-color: #fff;
+  margin: 0;
+  position: relative;
+  width: 100%;
+  height: 60px;
 }
+
+.page-aside {
+  border-right: 15px solid #e6ebf5;
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 60px;
+  bottom: 0;
+}
+
+.page-main {
+  position: absolute;
+  left: 195px;
+  margin: 0;
+  right: 10px;
+  top: 70px;
+  bottom: 0;
+  overflow-y: scroll;
+}
+
 
 .page-logo {
   height: 50px;
+
   font-size: 24px;
   font-weight: bold;
   color: #404040;
   background-color: #f5f7fa;
 }
 
-
 .page-body {
   flex: 1;
   display: flex;
   flex-direction: row;
+
+  background-color: #fff;
+
 }
 
-.page-aside {
-  border-right: 15px solid #e6ebf5; 
-}
 
 .el-menu {
   padding: 0;
   margin-right: 0px;
   height: 100%;
-}
-
-
-.page-main {
-  flex: 1;
-  background-color: #fff;
-  padding: 24px;
-  overflow: auto;
-  padding-top: 0;
 }
 </style>
