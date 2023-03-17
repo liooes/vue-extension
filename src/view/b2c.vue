@@ -1202,7 +1202,7 @@ export default {
                         for (let i = 0; i < res.data.data.length; i++) {
                             temp.push({
                                 //id
-                                id:res.data.data[i].id,
+                                id: res.data.data[i].id,
                                 //工单号
                                 emCode: res.data.data[i].emCode,
                                 //单号{订单号，客户单号，外部单号} numbers
@@ -1528,17 +1528,27 @@ export default {
                     // "processing"
                     // ]
 
-                switch (activeTabs.value) {
-                case 'a': {
-                    //加载我的关注数据
-                    console.log('加载我的关注数据', activeTabs.value)
-                    break;
-                }
-                case 'b': {
-                    console.log('加载已挂起数据', activeTabs.value)
-                    break;
-                }
-                case 'c': {
+                    switch (activeTabs.value) {
+                        case 'a': {
+                            //加载我的关注数据
+                            ElNotification({
+                                    title: '修改类型',
+                                    message: '我的关注功能暂未开放哦~',
+                                    type: 'warning',
+                                })
+                            console.log('加载我的关注数据', activeTabs.value)
+                            break;
+                        }
+                        case 'b': {
+                            ElNotification({
+                                    title: '修改类型',
+                                    message: '已挂起功能暂未开放哦~',
+                                    type: 'warning',
+                                })
+                            console.log('加载已挂起数据', activeTabs.value)
+                            break;
+                        }
+                        case 'c': {
                             if (this.tableDatawaitprocess.length > 0) {
                                 //遍历表格，修改类型，要修改的数据不能为空
                                 for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
@@ -1574,23 +1584,71 @@ export default {
                             }
                             break;
                         }
-                case 'd': {
-                    console.log('处理中表格数据',tableDatawaitprocess.value)
-                    break;
-                }
-                case 'e': {
-                    console.log('判责中表格数据',tableDatawaitprocess.value)
-                    break;
-                }
-                case 'f': {
-                    console.log('已完结表格数据',tableDatawaitprocess.value)
-                    break;
-                }
-                default: {
-                    console.log('没有选择处理状态...')
-                    break;
-                }
-            }
+                        case 'd': {
+                            if (this.tableDataprocessing.length > 0) {
+                                //遍历表格，修改类型，要修改的数据不能为空
+                                for (let i = 0; i < this.tableDataprocessing.length; i++) {
+                                    var temp = {
+                                        id: this.tableDataprocessing[i].id,
+                                        issueClassify: issueClassify.value,
+                                        issueType: issueType.value,
+                                        abnormalCount: 0
+                                    }
+                                    //发送post请求修改类型
+                                    axios.post(changeIssueTypeAPI, qs.stringify(temp), {
+                                        headers: {
+                                            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+                                        }
+                                    }).then(res => {
+                                        // ElNotification({
+                                        //     title: '修改类型',
+                                        //     message: '修改结果为：'+res.data.success,
+                                        //     type: 'info',
+                                        // })
+                                        console.log(res.data)
+                                    }).catch(error => {
+                                        console.log(error)
+                                    })
+                                    console.log('reqdata', qs.stringify(temp))
+                                }
+                                ElNotification({
+                                    title: '修改类型',
+                                    message: '已为您提交批量修改类型任务了~',
+                                    type: 'info',
+                                })
+                            } else {
+                                ElNotification({
+                                    title: '修改类型',
+                                    message: '工单列表为空哦，请搜索要修改的工单呢~',
+                                    type: 'info',
+                                })
+                            }
+                            console.log('处理中表格数据', tableDatawaitprocess.value)
+                            break;
+                        }
+                        case 'e': {
+                            ElNotification({
+                                    title: '修改类型',
+                                    message: '判责中工单不能修改类型呢~',
+                                    type: 'warning',
+                                })
+                            console.log('判责中表格数据', tableDatawaitprocess.value)
+                            break;
+                        }
+                        case 'f': {
+                            ElNotification({
+                                    title: '修改类型',
+                                    message: '已完结工单不能修改类型呢~',
+                                    type: 'warning',
+                                })
+                            console.log('已完结表格数据', tableDatawaitprocess.value)
+                            break;
+                        }
+                        default: {
+                            console.log('没有选择处理状态...')
+                            break;
+                        }
+                    }
                     //将抽屉关闭
                     drawerchangeIssue.value = false
                 })
