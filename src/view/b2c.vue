@@ -69,11 +69,11 @@
                     <el-col>
                         <el-form-item class="btn">
                             <el-button type="primary">发送信息</el-button>
-                            <el-button type="primary">修改类型</el-button>
+                            <el-button type="primary" @click="changeIssueType">修改类型</el-button>
                             <el-button>完结工单</el-button>
                             <el-button type="primary">重开工单</el-button>
                             <el-button type="primary">修改状态</el-button>
-                            <el-button type="primary" @click="searchOrder">搜索工单</el-button>
+                            <el-button :icon="Search" type="primary" @click="searchOrder">搜索工单</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -166,6 +166,7 @@
 import axios from 'axios'
 import qs from 'qs'
 import { ref } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 //项目
 const project = ref('')
@@ -948,6 +949,8 @@ export default {
             this.tableDataprocessing = []
             this.tableDataunconfirm = []
             this.tableDatafinish = []
+            //重置分页总数
+            this.pagetotal = 0;
             //获取工单数量
             this.getNumList();
            
@@ -1357,6 +1360,7 @@ export default {
             //工单状态数量列表 numlistData
             //下标值：我的关注，已挂起，待处理，处理中，判责中，已完结
             // var temp = Math.ceil(numlistData[2] / pagesize.value);
+            this.pagetotal = 0;
             //根据选中的标签设置分页的总条数
             //加载对应标签数据
             switch (activeTabs.value) {
@@ -1451,9 +1455,10 @@ export default {
         pagesizechange(){
             this.tabchange();
         },
-        top(){
-            console.log('top')
-        },
+        //修改工单类型
+        changeIssueType() {
+           
+        }
     },
     mounted() {
     }
