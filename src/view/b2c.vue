@@ -69,7 +69,7 @@
                     <el-col>
                         <el-form-item class="btn">
                             <el-button type="primary">发送信息</el-button>
-                            <el-button type="primary" @click="changeIssueType">修改类型</el-button>
+                            <el-button type="primary" @click="drawerchangeIssue = true">修改类型</el-button>
                             <el-button>完结工单</el-button>
                             <el-button type="primary">重开工单</el-button>
                             <el-button type="primary">修改状态</el-button>
@@ -81,13 +81,14 @@
         </el-row>
     </div>
     <!-- 标签页 -->
-    <div class="el-tabs-orders">     
+    <div class="el-tabs-orders">
         <el-tabs type="card" v-model="activeTabs" @tab-change="tabchange">
             <!-- 显示数量 -->
             <div class="pagesize">
-                    <el-select v-model="pagesize" placeholder="请选择数量" size="defalut" style="width:80px" @change="pagesizechange">
-                        <el-option v-for="item in pagesizeOptions" :key="item.value" :label="item.label" :value="item.value"/>
-                    </el-select>
+                <el-select v-model="pagesize" placeholder="请选择数量" size="defalut" style="width:80px"
+                    @change="pagesizechange">
+                    <el-option v-for="item in pagesizeOptions" :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
             </div>
             <!-- 工单表格 -->
             <el-tab-pane v-bind:label="followlabel" name="a">
@@ -110,56 +111,80 @@
                 <el-table :data="tableDataprocessing" stripe border style="width:100%">
                     <el-table-column sortable align="center" prop="emCode" label="工单号" width="180" />
                     <el-table-column sortable align="center" prop="orderCode" label="单号" width="180" />
-                    <el-table-column sortable align="center" prop="projectName" label="项目"  width="220" />
-                    <el-table-column sortable align="center" prop="lastUpdateTime" label="最新处理时间"  />
-                    <el-table-column sortable align="center" prop="interactTarget" label="交互对象" width="110"  />
-                    <el-table-column sortable align="center" prop="shippingOrderNo" label="快递信息"  />
-                    <el-table-column sortable align="center" prop="createTime" label="工单提交信息"  />
-                    <el-table-column sortable align="center" prop="currentContent" label="最新处理信息"  width="240" />
+                    <el-table-column sortable align="center" prop="projectName" label="项目" width="220" />
+                    <el-table-column sortable align="center" prop="lastUpdateTime" label="最新处理时间" />
+                    <el-table-column sortable align="center" prop="interactTarget" label="交互对象" width="110" />
+                    <el-table-column sortable align="center" prop="shippingOrderNo" label="快递信息" />
+                    <el-table-column sortable align="center" prop="createTime" label="工单提交信息" />
+                    <el-table-column sortable align="center" prop="currentContent" label="最新处理信息" width="240" />
                 </el-table>
             </el-tab-pane>
             <el-tab-pane v-bind:label="unconfirmlabel" name="e">
-               <el-table :data="tableDataunconfirm" stripe border style="width:100%">
-                    <el-table-column sortable align="center" prop="emCode" label="工单号" width="180"/>
+                <el-table :data="tableDataunconfirm" stripe border style="width:100%">
+                    <el-table-column sortable align="center" prop="emCode" label="工单号" width="180" />
                     <el-table-column sortable align="center" prop="orderCode" label="单号" width="180" />
-                    <el-table-column sortable align="center" prop="projectName" label="项目"  width="220" />
-                    <el-table-column sortable align="center" prop="lastUpdateTime" label="最新处理时间"  />
-                    <el-table-column sortable align="center" prop="interactTarget" label="交互对象" width="110"  />
-                    <el-table-column sortable align="center" prop="shippingOrderNo" label="快递信息"  />
-                    <el-table-column sortable align="center" prop="createTime" label="工单提交信息"  />
-                    <el-table-column sortable align="center" prop="currentOperation" label="最新处理信息"  width="240" />
+                    <el-table-column sortable align="center" prop="projectName" label="项目" width="220" />
+                    <el-table-column sortable align="center" prop="lastUpdateTime" label="最新处理时间" />
+                    <el-table-column sortable align="center" prop="interactTarget" label="交互对象" width="110" />
+                    <el-table-column sortable align="center" prop="shippingOrderNo" label="快递信息" />
+                    <el-table-column sortable align="center" prop="createTime" label="工单提交信息" />
+                    <el-table-column sortable align="center" prop="currentOperation" label="最新处理信息" width="240" />
                 </el-table>
             </el-tab-pane>
             <el-tab-pane v-bind:label="finishlabel" name="f">
                 <el-table :data="tableDatafinish" stripe border style="width:100%">
-                    <el-table-column sortable align="center" prop="emCode" label="工单号" width="180"/>
+                    <el-table-column sortable align="center" prop="emCode" label="工单号" width="180" />
                     <el-table-column sortable align="center" prop="orderCode" label="单号" width="180" />
-                    <el-table-column sortable align="center" prop="projectName" label="项目"  width="220" />
-                    <el-table-column sortable align="center" prop="interactTarget" label="交互对象" width="110"  />
-                    <el-table-column sortable align="center" prop="shippingOrderNo" label="快递信息"  />
-                    <el-table-column sortable align="center" prop="createTime" label="工单提交信息"  />
-                    <el-table-column sortable align="center" prop="lastUpdateTime" label="工单完结时间"  />
+                    <el-table-column sortable align="center" prop="projectName" label="项目" width="220" />
+                    <el-table-column sortable align="center" prop="interactTarget" label="交互对象" width="110" />
+                    <el-table-column sortable align="center" prop="shippingOrderNo" label="快递信息" />
+                    <el-table-column sortable align="center" prop="createTime" label="工单提交信息" />
+                    <el-table-column sortable align="center" prop="lastUpdateTime" label="工单完结时间" />
                 </el-table>
             </el-tab-pane>
         </el-tabs>
-    </div> 
+    </div>
     <!-- 分页 -->
     <div class="elpagination">
-        <el-pagination background layout="prev, pager, next"
-        :pager-count="6" 
-        :page-size="pagesize" 
-        :total="pagetotal" 
-        @current-change="pagechange"
-         />
+        <el-pagination background layout="prev, pager, next" :pager-count="6" :page-size="pagesize" :total="pagetotal"
+            @current-change="pagechange" />
     </div>
     <!-- 回到顶部 -->
-    <el-backtop 
-        target=".page-main"
-        :visibility-height=0
-        :right="45" 
-        :bottom="80"
+    <el-backtop target=".page-main" :visibility-height=0 :right="45" :bottom="80"
         style="background-color:#545C64;color: aliceblue;">
     </el-backtop>
+
+    <!-- 修改类型抽屉 -->
+    <el-drawer v-model="drawerchangeIssue" :direction="direction">
+        <template #header>
+            <h4>修改类型</h4>
+        </template>
+        <template #default>
+            <div>
+                <el-form-item label="问题类别:">
+                    <el-select v-model="issueClassify" placeholder="请选择问题类别" @change="handleChange">
+                        <el-option v-for="item in issueClassifyOptions" :key="item.value" :label="item.label"
+                            :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="问题类型:">
+                    <el-select v-model="issueType" placeholder="请选择问题类型">
+                        <el-option v-for="item in issueTypeOptions" :key="item.value" :label="item.label"
+                            :value="item.value"></el-option>
+                    </el-select>
+                </el-form-item>
+
+            </div>
+        </template>
+        <template #footer>
+            <div style="flex: auto">
+                <!-- 用户点击取消按钮后的响应 -->
+                <el-button @click="drawerchangeIssueTypecancelClick">cancel</el-button>
+                <!-- 用户点击确认后的响应 -->
+                <el-button type="primary" @click="drawerchangeIssueTypeconfirmClick">confirm</el-button>
+            </div>
+        </template>
+    </el-drawer>
 </template>
 
 <script>
@@ -167,6 +192,11 @@ import axios from 'axios'
 import qs from 'qs'
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElNotification } from 'element-plus'
+
+const drawerchangeIssue = ref(false)
+const direction = ref('rtl')
+
 
 //项目
 const project = ref('')
@@ -190,15 +220,15 @@ const activeTabs = ref('c')
 //选择数量
 const pagesize = ref('')
 const pagesizeOptions = [
-    { value:10,label:'10' },
-    { value:100,label:'100' },
-    { value:500,label:'500' },
+    { value: 10, label: '10' },
+    { value: 100, label: '100' },
+    { value: 500, label: '500' },
 ]
 
 //工单状态数量列表
 //下标值：我的关注，已挂起，待处理，处理中，判责中，已完结
 // 0,1,2,3,4,5
-var numlistData = [  ]
+var numlistData = []
 
 //待处理表格数据
 const tableDatawaitprocess = ref([])
@@ -300,6 +330,8 @@ const getprojectAPI = "https://newem.800best.com/ajax/company-user/user/data-acc
 const getPageListAPI = "https://newem.800best.com/ajax/em/b2c/judge/getPageList";
 //获取工单数量
 const getNumListAPI = "https://newem.800best.com/ajax/em/b2c/judge/getNumList ";
+//修改类型API
+const changeIssueTypeAPI = "https://newem.800best.com/ajax/em/changeIssueType";
 
 //获取工单数量请求数据
 const getNumListData = {
@@ -881,13 +913,17 @@ setTimeout(function (e) {
 export default {
     data() {
         return {
+            //修改信息抽屉
+            drawerchangeIssue,
+            //抽屉出现方式
+            direction,
             //工单数量列表
             numlistData,
             //每页显示的数量
             pagesize,
             pagesizeOptions,
             //分页控件数量总数
-            pagetotal:0,
+            pagetotal: 0,
             // 我的关注工单数量显示
             followlabel,
             suspendedlabel,
@@ -953,7 +989,7 @@ export default {
             this.pagetotal = 0;
             //获取工单数量
             this.getNumList();
-           
+
             //加载对应标签数据
             switch (activeTabs.value) {
                 case 'a': {
@@ -1054,11 +1090,11 @@ export default {
                     // this.project = this.projectOptions[0];
                 } else {
                     this.desktopnotification(res.data.toString())
-                    console.log('获取所有项目的响应',res)
+                    console.log('获取所有项目的响应', res)
                 }
             }).catch(error => {
                 this.desktopnotification(error.toString())
-                console.log('获取所有项目的响应',error);
+                console.log('获取所有项目的响应', error);
             })
 
         },
@@ -1130,7 +1166,7 @@ export default {
                     this.finishlabel = "已完结" + "(" + res.data.data[5] + ")";//待处理的下标
                     //将数量保存到工单数量列表里
                     numlistData = res.data.data;
-                     //设置分页控件总条数
+                    //设置分页控件总条数
                     this.setpagetotal(res.data.data);
                 })
                 .catch(error => {
@@ -1155,7 +1191,7 @@ export default {
             // waitprocessOrderData.so.createTimeBegin = times[0];
             // waitprocessOrderData.so.createTimeEnd = times[1];
             // console.log('修改后的时间', waitprocessOrderData.so)
-            
+
             axios.post(getPageListAPI, waitprocessOrderData, {
                 headers: { "Content-Type": "application/json; charset=UTF-8" }
             })
@@ -1165,6 +1201,8 @@ export default {
                         // this.tableData = temp
                         for (let i = 0; i < res.data.data.length; i++) {
                             temp.push({
+                                //id
+                                id:res.data.data[i].id,
                                 //工单号
                                 emCode: res.data.data[i].emCode,
                                 //单号{订单号，客户单号，外部单号} numbers
@@ -1202,7 +1240,7 @@ export default {
                 });
         },
         //获取前处理中工单
-        getprocessOrder(){
+        getprocessOrder() {
             //替换请求内容，实现数据筛选
             this.setrequestData(processOrderData);
             // //设置选中的项目
@@ -1222,38 +1260,40 @@ export default {
             // console.log('修改后的时间', processOrderData.so)
 
 
-            axios.post(getPageListAPI,processOrderData,{
+            axios.post(getPageListAPI, processOrderData, {
                 headers: { "Content-Type": "application/json; charset=UTF-8" }
-            }).then(res =>{
-                const temp =[]
+            }).then(res => {
+                const temp = []
                 for (let i = 0; i < res.data.data.length; i++) {
                     temp.push({
-                        emCode:res.data.data[i].emCode,
-                        orderCode:res.data.data[i].orderCode,
-                        projectName:res.data.data[i].projectName,
+                        //id
+                        id: res.data.data[i].id,
+                        emCode: res.data.data[i].emCode,
+                        orderCode: res.data.data[i].orderCode,
+                        projectName: res.data.data[i].projectName,
                         //将最新处理时间戳转字符串日期
-                        lastUpdateTime:this.timestampToDateString(res.data.data[i].lastUpdateTime),
+                        lastUpdateTime: this.timestampToDateString(res.data.data[i].lastUpdateTime),
                         //将英文转换为指定中文
-                        interactTarget:res.data.data[i].interactTarget === 'carrier' ? '承运商' :
-                        res.data.data[i].interactTarget === 'customer' ? '客户' :
-                        res.data.data[i].interactTarget === 'warehouser' ? '仓库' :
-                        '未知',
-                        shippingOrderNo:res.data.data[i].shippingOrderNo,
+                        interactTarget: res.data.data[i].interactTarget === 'carrier' ? '承运商' :
+                            res.data.data[i].interactTarget === 'customer' ? '客户' :
+                                res.data.data[i].interactTarget === 'warehouser' ? '仓库' :
+                                    '未知',
+                        shippingOrderNo: res.data.data[i].shippingOrderNo,
                         //将工单创建时间戳转字符串日期
-                        createTime:this.timestampToDateString(res.data.data[i].createTime),
+                        createTime: this.timestampToDateString(res.data.data[i].createTime),
                         //最新回复信息描述
-                        currentContent:res.data.data[i].currentContent,
-                    })                    
+                        currentContent: res.data.data[i].currentContent,
+                    })
                 }
                 this.tableDataprocessing = temp;
-                console.log('获取处理中工单成功响应数据为：',res.data.data)
+                console.log('获取处理中工单成功响应数据为：', res.data.data)
             })
-            .catch(error =>{
-                console.log('获取处理中工单异常',error)
-            })
+                .catch(error => {
+                    console.log('获取处理中工单异常', error)
+                })
         },
         //获取判责待确认工单
-        getunconfirmOrder(){
+        getunconfirmOrder() {
             //替换请求内容，实现数据筛选
             this.setrequestData(unconfirmOrderData);
             // //设置选中的项目
@@ -1271,39 +1311,41 @@ export default {
             // unconfirmOrderData.so.createTimeBegin = times[0];
             // unconfirmOrderData.so.createTimeEnd = times[1];
 
-            axios.post(getPageListAPI,unconfirmOrderData,{
-                headers:{
+            axios.post(getPageListAPI, unconfirmOrderData, {
+                headers: {
                     "Content-Type": "application/json; charset=UTF-8"
                 }
-            }).then( res =>{
+            }).then(res => {
                 const temp = []
                 for (let i = 0; i < res.data.data.length; i++) {
                     temp.push({
-                        emCode:res.data.data[i].emCode,
-                        orderCode:res.data.data[i].orderCode,
-                        projectName:res.data.data[i].projectName,
+                        //id
+                        id: res.data.data[i].id,
+                        emCode: res.data.data[i].emCode,
+                        orderCode: res.data.data[i].orderCode,
+                        projectName: res.data.data[i].projectName,
                         //将最新处理时间戳转字符串日期
-                        lastUpdateTime:this.timestampToDateString(res.data.data[i].lastUpdateTime),
+                        lastUpdateTime: this.timestampToDateString(res.data.data[i].lastUpdateTime),
                         //将英文转换为指定中文
-                        interactTarget:res.data.data[i].interactTarget === 'carrier' ? '承运商' :
-                        res.data.data[i].interactTarget === 'customer' ? '客户' :
-                        res.data.data[i].interactTarget === 'warehouser' ? '仓库' :
-                        '未知',
-                        shippingOrderNo:res.data.data[i].shippingOrderNo,
+                        interactTarget: res.data.data[i].interactTarget === 'carrier' ? '承运商' :
+                            res.data.data[i].interactTarget === 'customer' ? '客户' :
+                                res.data.data[i].interactTarget === 'warehouser' ? '仓库' :
+                                    '未知',
+                        shippingOrderNo: res.data.data[i].shippingOrderNo,
                         //将工单创建时间戳转字符串日期
-                        createTime:this.timestampToDateString(res.data.data[i].createTime),
+                        createTime: this.timestampToDateString(res.data.data[i].createTime),
                         //最新回复信息描述
-                        currentOperation:res.data.data[i].currentOperation,
-                    }) 
+                        currentOperation: res.data.data[i].currentOperation,
+                    })
                     this.tableDataunconfirm = temp;
-                    console.log('获取处理中工单成功响应数据为：',res.data.data)     
+                    console.log('获取处理中工单成功响应数据为：', res.data.data)
                 }
-            }).catch(error =>{
+            }).catch(error => {
                 console.log(error)
             })
         },
         //获取已完结工单
-        getfinishOrder(){
+        getfinishOrder() {
             //替换请求内容，实现数据筛选
             this.setrequestData(finishOrderdata);
             // //设置选中的项目
@@ -1321,40 +1363,42 @@ export default {
             // finishOrderdata.so.createTimeBegin = times[0];
             // finishOrderdata.so.createTimeEnd = times[1];
 
-            axios.post(getPageListAPI,finishOrderdata,{
-                headers:{
-                    "Content-Type":"application/json; chartset-utf-8"
+            axios.post(getPageListAPI, finishOrderdata, {
+                headers: {
+                    "Content-Type": "application/json; chartset-utf-8"
                 }
-            }).then(res =>{
+            }).then(res => {
                 const temp = []
                 for (let i = 0; i < res.data.data.length; i++) {
                     temp.push({
-                        emCode:res.data.data[i].emCode,
-                        orderCode:res.data.data[i].orderCode,
-                        projectName:res.data.data[i].projectName,
+                        //id
+                        id: res.data.data[i].id,
+                        emCode: res.data.data[i].emCode,
+                        orderCode: res.data.data[i].orderCode,
+                        projectName: res.data.data[i].projectName,
 
-                        interactTarget:res.data.data[i].interactTarget === 'carrier' ? '承运商' :
-                        res.data.data[i].interactTarget === 'customer' ? '客户' :
-                        res.data.data[i].interactTarget === 'warehouser' ? '仓库' :
-                        '未知',
-                        shippingOrderNo:res.data.data[i].shippingOrderNo,
+                        interactTarget: res.data.data[i].interactTarget === 'carrier' ? '承运商' :
+                            res.data.data[i].interactTarget === 'customer' ? '客户' :
+                                res.data.data[i].interactTarget === 'warehouser' ? '仓库' :
+                                    '未知',
+                        shippingOrderNo: res.data.data[i].shippingOrderNo,
 
-                        createTime:this.timestampToDateString(res.data.data[i].createTime),
-                        lastUpdateTime:this.timestampToDateString(res.data.data[i].lastUpdateTime),
-                    })                  
+                        createTime: this.timestampToDateString(res.data.data[i].createTime),
+                        lastUpdateTime: this.timestampToDateString(res.data.data[i].lastUpdateTime),
+                    })
                 }
                 this.tableDatafinish = temp;
             })
-            .catch(error =>{
-                console.log('获取已完结工单',error);
-            })
+                .catch(error => {
+                    console.log('获取已完结工单', error);
+                })
         },
         //设置分页控件总数
-        setpagetotal(){
+        setpagetotal() {
             //分页总数 = 获取到的工单数量 / 选择显示的数量
             //分页总数需要向上取整
             // Math.ceil(需要向上取整的数);
-            
+
             //数据总条数 pagetotal
             //每页显示数量 pagesize
             //工单状态数量列表 numlistData
@@ -1404,9 +1448,9 @@ export default {
             }
         },
         //页面改变，加载对应标签，对应位置tableData数据
-        pagechange(val){
-             //加载对应标签数据
-             switch (activeTabs.value) {
+        pagechange(val) {
+            //加载对应标签数据
+            switch (activeTabs.value) {
                 case 'a': {
                     //加载我的关注数据
                     console.log('加载我的关注数据', activeTabs.value)
@@ -1452,13 +1496,110 @@ export default {
             }
         },
         //pagesize change update tableData
-        pagesizechange(){
+        pagesizechange() {
             this.tabchange();
         },
-        //修改工单类型
-        changeIssueType() {
-           
-        }
+        //取消修改类型后关闭抽屉
+        drawerchangeIssueTypecancelClick() {
+            drawerchangeIssue.value = false;
+            ElNotification({
+                title: '取消修改',
+                message: '您取消修改类型了~',
+                type: 'info',
+            })
+            console.log('取消修改...')
+        },
+        //确认修改类型
+        drawerchangeIssueTypeconfirmClick() {
+            ElMessageBox.confirm('是否确认修改类型?')
+                .then(() => {
+                    //修改类型
+                    console.log('二次确认了修改，这里获取用户要修改的类型')
+                    //这里有个问题，列表有全部的选项，因为引用的是筛选条件的控件，后续需要把全部选项去掉
+
+                    //获取需要修改类型的列表，tableData里的数据，需要确定两个条件
+                    //对应的变量 activeTabs.value 
+                    //1.当前用户tabs标签停留的位置
+                    //2.根据停留位置获取对应的 tableData
+                    // [
+                    // "finish",
+                    // "waitprocess",
+                    // "unconfirm",
+                    // "processing"
+                    // ]
+
+                switch (activeTabs.value) {
+                case 'a': {
+                    //加载我的关注数据
+                    console.log('加载我的关注数据', activeTabs.value)
+                    break;
+                }
+                case 'b': {
+                    console.log('加载已挂起数据', activeTabs.value)
+                    break;
+                }
+                case 'c': {
+                            if (this.tableDatawaitprocess.length > 0) {
+                                //遍历表格，修改类型，要修改的数据不能为空
+                                for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
+                                    var temp = {
+                                        id: this.tableDatawaitprocess[i].id,
+                                        issueClassify: issueClassify.value,
+                                        issueType: issueType.value,
+                                        abnormalCount: 0
+                                    }
+                                    //发送post请求修改类型
+                                    axios.post(changeIssueTypeAPI, qs.stringify(temp), {
+                                        headers: {
+                                            headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+                                        }
+                                    }).then(res => {
+                                        console.log(res.data)
+                                    }).catch(error => {
+                                        console.log(error)
+                                    })
+                                    console.log('reqdata', qs.stringify(temp))
+                                }
+                                ElNotification({
+                                    title: '修改类型',
+                                    message: '已为您提交批量修改类型任务了~',
+                                    type: 'info',
+                                })
+                            } else {
+                                ElNotification({
+                                    title: '修改类型',
+                                    message: '工单列表为空哦，请搜索要修改的工单呢~',
+                                    type: 'info',
+                                })
+                            }
+                            break;
+                        }
+                case 'd': {
+                    console.log('处理中表格数据',tableDatawaitprocess.value)
+                    break;
+                }
+                case 'e': {
+                    console.log('判责中表格数据',tableDatawaitprocess.value)
+                    break;
+                }
+                case 'f': {
+                    console.log('已完结表格数据',tableDatawaitprocess.value)
+                    break;
+                }
+                default: {
+                    console.log('没有选择处理状态...')
+                    break;
+                }
+            }
+                    //将抽屉关闭
+                    drawerchangeIssue.value = false
+                })
+                .catch(error => {
+                    // catch error
+                    console.log(error);
+                })
+            console.log('点击了确认修改...')
+        },
     },
     mounted() {
     }
@@ -1467,10 +1608,10 @@ export default {
 
 
 <style scoped>
- 
-.pagesize{
+.pagesize {
     padding-bottom: 8px;
 }
+
 .elpagination {
     float: right;
     padding-top: 20px;
@@ -1483,7 +1624,7 @@ export default {
 
 .box-border {
     border: 1px solid #ddd;
-    margin: 0; 
+    margin: 0;
     padding: 0;
 }
 
