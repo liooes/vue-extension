@@ -1,7 +1,7 @@
 <template>
     <!-- 工单查询 -->
     <div class="box-border">
-        <el-row>
+        <el-row style="top:0px;">
             <el-col>
                 <h1 class="title-bg">工单查询</h1>
             </el-col>
@@ -34,9 +34,9 @@
                 <el-row>
                     <el-col :span="6">
                         <el-form-item label="问题类别:">
-                            <el-select v-model="issueClassify" placeholder="请选择问题类别" @change="handleChange">
+                            <el-select v-model="issueClassify" placeholder="请选择问题类别" @change="issueClassifyhandleChange">
                                 <el-option v-for="item in issueClassifyOptions" :key="item.value" :label="item.label"
-                                    :value="item.value"></el-option>
+                                    :value="item.value" :disabled="item.disabled"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -44,7 +44,7 @@
                         <el-form-item label="问题类型:">
                             <el-select v-model="issueType" placeholder="请选择问题类型">
                                 <el-option v-for="item in issueTypeOptions" :key="item.value" :label="item.label"
-                                    :value="item.value"></el-option>
+                                    :value="item.value" :disabled="item.disabled"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
@@ -68,12 +68,18 @@
                 <el-row>
                     <el-col>
                         <el-form-item class="btn">
-                            <el-button type="primary">发送信息</el-button>
-                            <el-button type="primary" @click="drawerchangeIssue = true">修改类型</el-button>
-                            <el-button>完结工单</el-button>
-                            <el-button type="primary">重开工单</el-button>
-                            <el-button type="primary">修改状态</el-button>
-                            <el-button :icon="Search" type="primary" @click="searchOrder">搜索工单</el-button>
+                            <!-- <el-button color="#dd2c00" :icon="Edit">发送信息</el-button>
+                            <el-button color="#212121" @click="drawerchangeIssue = true">修改类型</el-button>
+                            <el-button color="#056f00">完结工单</el-button>
+                            <el-button color="#4527a0">重开工单</el-button>
+                            <el-button color="#ad1457">修改状态</el-button>
+                            <el-button color="#6a1b9a" :icon="Search"   @click="searchOrder">搜索工单</el-button> -->
+                            <el-button disabled>发送信息</el-button>
+                            <el-button type="primary"  @click="drawerchangeIssue = true">修改类型</el-button>
+                            <el-button  disabled>完结工单</el-button>
+                            <el-button  disabled>重开工单</el-button>
+                            <el-button  disabled>修改状态</el-button>
+                            <el-button type="primary"   :icon="Search"   @click="searchOrder">搜索工单</el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -155,34 +161,38 @@
     </el-backtop>
 
     <!-- 修改类型抽屉 -->
-    <el-drawer v-model="drawerchangeIssue" :direction="direction">
+    <el-drawer v-model="drawerchangeIssue" 
+    :direction="direction" 
+    size="20%"
+    @open="opendrawerchangeIssue" @close="closedrawerchangeIssue">
         <template #header>
-            <h4>修改类型</h4>
+            <h2>请选择要修改的类型</h2>
         </template>
         <template #default>
             <div>
                 <el-form-item label="问题类别:">
-                    <el-select v-model="issueClassify" placeholder="请选择问题类别" @change="handleChange">
+                    <el-select v-model="issueClassify" placeholder="请选择问题类别" @change="issueClassifyhandleChange">
                         <el-option v-for="item in issueClassifyOptions" :key="item.value" :label="item.label"
-                            :value="item.value"></el-option>
+                            :value="item.value"  :disabled="item.disabled"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="问题类型:">
                     <el-select v-model="issueType" placeholder="请选择问题类型">
                         <el-option v-for="item in issueTypeOptions" :key="item.value" :label="item.label"
-                            :value="item.value"></el-option>
+                            :value="item.value"  :disabled="item.disabled"></el-option>
                     </el-select>
                 </el-form-item>
-
+            </div>
+            <div style="float: right;">
+                <br><br>
+                <!-- 用户点击取消按钮后关闭抽屉 -->
+                <el-button @click="drawerchangeIssueTypecancelClick">取消</el-button>
+                <!-- 用户点击确认修改类型后的响应 -->
+                <el-button type="primary" @click="drawerchangeIssueTypeconfirmClick">确定</el-button>
             </div>
         </template>
         <template #footer>
-            <div style="flex: auto">
-                <!-- 用户点击取消按钮后的响应 -->
-                <el-button @click="drawerchangeIssueTypecancelClick">cancel</el-button>
-                <!-- 用户点击确认后的响应 -->
-                <el-button type="primary" @click="drawerchangeIssueTypeconfirmClick">confirm</el-button>
-            </div>
+            
         </template>
     </el-drawer>
 </template>
@@ -193,6 +203,18 @@ import qs from 'qs'
 import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ElNotification } from 'element-plus'
+import { ElLoading } from 'element-plus'
+
+//开始加载
+// const loadingInstance = ElLoading.service(loadingoptions); 
+//全屏加载动画配置参数
+const loadingoptions = { 
+        target: '.page-main',
+        lock: true,
+        text: 'Loading',
+        background: 'rgba(0, 0, 0, 0.3)',
+};
+ 
 
 const drawerchangeIssue = ref(false)
 const direction = ref('rtl')
@@ -246,7 +268,6 @@ const processinglabel = ref('处理中(0)')
 const unconfirmlabel = ref('判责中(0)')
 const finishlabel = ref('已完结(0)')
 
-// const [project, ordernumber, issueClassify, issueType, interactTarget, replystatus] = Array.from({length: 6}, () => ref(''))
 //创建日期，左侧快速选择日期
 const pkvla = [
     {
@@ -292,13 +313,14 @@ const itOptions = [
     { value: 'warehouser', label: '仓库' },
 ]
 //问题类别
-const icOptions = [
+var icOptions = [
     { value: '', label: '全部' },
     { value: 'LOGISTICS', label: '在途异常' },
     { value: 'CUSTOMER', label: '客户原因' },
     { value: 'ITEM', label: '货损货差' },
 ]
 //问题类型
+//在途异常
 const LOGISTICS = [
     { value: '催派', label: '催派' },
     { value: '签收未收', label: '签收未收' },
@@ -306,6 +328,7 @@ const LOGISTICS = [
     { value: '超区', label: '超区' },
     { value: '双面单', label: '双面单' },
 ]
+//客户原因
 const CUSTOMER = [
     { value: '截件/拒收', label: '截件/拒收' },
     { value: '修改信息', label: '修改信息' },
@@ -313,6 +336,7 @@ const CUSTOMER = [
     { value: '商品质量问题', label: '商品质量问题' },
     { value: '下单信息错误', label: '下单信息错误' },
 ]
+//货损货差
 const ITEM = [
     { value: '包裹丢失', label: '包裹丢失' },
     { value: '破损', label: '破损' },
@@ -321,6 +345,7 @@ const ITEM = [
     { value: '优派遗失', label: '优派遗失' },
     { value: '多发', label: '多发' },
 ]
+//全部
 const all = [
     { value: '', label: '全部' },
 ]
@@ -913,6 +938,9 @@ setTimeout(function (e) {
 export default {
     data() {
         return {
+            //加载动画 
+            // loadingInstance,
+            loadingoptions,
             //修改信息抽屉
             drawerchangeIssue,
             //抽屉出现方式
@@ -1050,7 +1078,7 @@ export default {
             return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}:${second.toString().padStart(2, '0')}`
         },
         //问题类别联动
-        handleChange(val) {
+        issueClassifyhandleChange(val) {
             this.issueType = ''
             switch (val) {
                 case '':
@@ -1136,6 +1164,7 @@ export default {
         },
         //获取工单数量
         getNumList() {
+        //   const loading =  ElLoading.service(loadingoptions);
             // this.setrequestData(getNumListData);
             //设置选中的项目
             getNumListData.projectCode = project.value;
@@ -1168,6 +1197,7 @@ export default {
                     numlistData = res.data.data;
                     //设置分页控件总条数
                     this.setpagetotal(res.data.data);
+                    // loading.close();
                 })
                 .catch(error => {
                     console.error('获取工单数量', error);
@@ -1175,6 +1205,8 @@ export default {
         },
         //获取待处理工单
         getwaitprocessOrder() {
+            //开始加载，数量为10的时候不加载
+          const loading =  ElLoading.service(loadingoptions);
             this.setrequestData(waitprocessOrderData);
             // //设置选中的项目
             // waitprocessOrderData.so.projectCode = project.value;
@@ -1234,13 +1266,17 @@ export default {
                     } else {
                         this.notifications(res.data.success)
                     }
+                    //结束加载
+                    loading.close();
                 })
                 .catch(error => {
                     console.error('获取待处理工单Error:', error);
                 });
         },
-        //获取前处理中工单
+        //获取处理中工单
         getprocessOrder() {
+              //开始加载，数量为10的时候不加载
+            const loading =  ElLoading.service(loadingoptions);
             //替换请求内容，实现数据筛选
             this.setrequestData(processOrderData);
             // //设置选中的项目
@@ -1258,7 +1294,6 @@ export default {
             // processOrderData.so.createTimeBegin = times[0];
             // processOrderData.so.createTimeEnd = times[1];
             // console.log('修改后的时间', processOrderData.so)
-
 
             axios.post(getPageListAPI, processOrderData, {
                 headers: { "Content-Type": "application/json; charset=UTF-8" }
@@ -1287,6 +1322,8 @@ export default {
                 }
                 this.tableDataprocessing = temp;
                 console.log('获取处理中工单成功响应数据为：', res.data.data)
+                  //加载结束
+                  loading.close();
             })
                 .catch(error => {
                     console.log('获取处理中工单异常', error)
@@ -1294,6 +1331,8 @@ export default {
         },
         //获取判责待确认工单
         getunconfirmOrder() {
+              //开始加载，数量为10的时候不加载
+             const loading= ElLoading.service(loadingoptions);
             //替换请求内容，实现数据筛选
             this.setrequestData(unconfirmOrderData);
             // //设置选中的项目
@@ -1340,12 +1379,16 @@ export default {
                     this.tableDataunconfirm = temp;
                     console.log('获取处理中工单成功响应数据为：', res.data.data)
                 }
+                  //开始加载，数量为10的时候不加载
+                  loading.close();
             }).catch(error => {
                 console.log(error)
             })
         },
         //获取已完结工单
         getfinishOrder() {
+              //开始加载，数量为10的时候不加载
+            const loading= ElLoading.service(loadingoptions);
             //替换请求内容，实现数据筛选
             this.setrequestData(finishOrderdata);
             // //设置选中的项目
@@ -1388,6 +1431,8 @@ export default {
                     })
                 }
                 this.tableDatafinish = temp;
+                  //开始加载，数量为10的时候不加载
+                  loading.close();
             })
                 .catch(error => {
                     console.log('获取已完结工单', error);
@@ -1447,7 +1492,7 @@ export default {
                 }
             }
         },
-        //页面改变，加载对应标签，对应位置tableData数据
+        //页面数量改变，加载对应标签，对应位置tableData数据
         pagechange(val) {
             //加载对应标签数据
             switch (activeTabs.value) {
@@ -1499,6 +1544,23 @@ export default {
         pagesizechange() {
             this.tabchange();
         },
+        //关闭修改类型抽屉后启用全部，
+        closedrawerchangeIssue(){
+            this.issueClassifyOptions.shift();//数组中删除第一个元素
+            this.issueClassifyOptions.unshift({ value: '', label: '全部'});
+            console.log('close drawer changeIssue');
+        },
+        //打开修改类型抽屉后禁用全部，并且设置默认选择项
+        opendrawerchangeIssue(){
+            this.issueClassifyOptions.shift();//数组中删除第一个元素
+            this.issueClassifyOptions.unshift({ value: '', label: '全部',  disabled: true});
+
+            //设置选择 客户原因 - 截件/拒收
+            this.issueClassify = this.issueClassifyOptions[2].value;
+            this.issueClassifyhandleChange(issueClassify.value);
+             
+            console.log('open drawer changeIssue');
+        },
         //取消修改类型后关闭抽屉
         drawerchangeIssueTypecancelClick() {
             drawerchangeIssue.value = false;
@@ -1511,12 +1573,9 @@ export default {
         },
         //确认修改类型
         drawerchangeIssueTypeconfirmClick() {
-            ElMessageBox.confirm('是否确认修改类型?')
-                .then(() => {
+            ElMessageBox.confirm('是否确认修改类型?').then(() => {
                     //修改类型
                     console.log('二次确认了修改，这里获取用户要修改的类型')
-                    //这里有个问题，列表有全部的选项，因为引用的是筛选条件的控件，后续需要把全部选项去掉
-
                     //获取需要修改类型的列表，tableData里的数据，需要确定两个条件
                     //对应的变量 activeTabs.value 
                     //1.当前用户tabs标签停留的位置
@@ -1548,8 +1607,14 @@ export default {
                             console.log('加载已挂起数据', activeTabs.value)
                             break;
                         }
+                        //待处理
                         case 'c': {
                             if (this.tableDatawaitprocess.length > 0) {
+                                //修改结果数据，用于通知用户修改成功了多少条
+                                var editCount = 0;
+                                //响应数据总数，用于所有响应结束后的通知
+                                var rescount = 0;
+
                                 //遍历表格，修改类型，要修改的数据不能为空
                                 for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
                                     var temp = {
@@ -1564,17 +1629,25 @@ export default {
                                             headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
                                         }
                                     }).then(res => {
-                                        console.log(res.data)
+                                          // 响应数据总数
+                                        rescount += 1;
+                                        //存储修改成功的数量
+                                         if (res.data.success === true) {
+                                            editCount = editCount + 1;
+                                        }
+                                       //所有响应结束后通知
+                                        if(rescount===this.tableDatawaitprocess.length){
+                                            ElNotification({
+                                                title: '修改类型',
+                                                message: '已修改' + editCount + '条工单类型为:' + issueType.value,
+                                                type: 'info',
+                                            })
+                                        }
                                     }).catch(error => {
                                         console.log(error)
                                     })
                                     console.log('reqdata', qs.stringify(temp))
                                 }
-                                ElNotification({
-                                    title: '修改类型',
-                                    message: '已为您提交批量修改类型任务了~',
-                                    type: 'info',
-                                })
                             } else {
                                 ElNotification({
                                     title: '修改类型',
@@ -1584,8 +1657,14 @@ export default {
                             }
                             break;
                         }
+                        //处理中
                         case 'd': {
+                            //表格数据不为空时修改
                             if (this.tableDataprocessing.length > 0) {
+                                //修改结果数据，用于通知用户修改成功了多少条
+                                var editCount = 0;
+                                //响应数据总数，用于所有响应结束后的通知
+                                var rescount = 0;
                                 //遍历表格，修改类型，要修改的数据不能为空
                                 for (let i = 0; i < this.tableDataprocessing.length; i++) {
                                     var temp = {
@@ -1600,22 +1679,25 @@ export default {
                                             headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
                                         }
                                     }).then(res => {
-                                        // ElNotification({
-                                        //     title: '修改类型',
-                                        //     message: '修改结果为：'+res.data.success,
-                                        //     type: 'info',
-                                        // })
-                                        console.log(res.data)
+                                        // 响应数据总数
+                                        rescount += 1;
+                                        //存储修改成功的数量
+                                         if (res.data.success === true) {
+                                            editCount = editCount + 1;
+                                        }
+                                       //所有响应结束后通知
+                                        if(rescount===this.tableDataprocessing.length){
+                                            ElNotification({
+                                                title: '修改类型',
+                                                message: '已修改' + editCount + '条工单类型为:' + issueType.value,
+                                                type: 'info',
+                                            })
+                                        }
                                     }).catch(error => {
                                         console.log(error)
                                     })
                                     console.log('reqdata', qs.stringify(temp))
                                 }
-                                ElNotification({
-                                    title: '修改类型',
-                                    message: '已为您提交批量修改类型任务了~',
-                                    type: 'info',
-                                })
                             } else {
                                 ElNotification({
                                     title: '修改类型',
@@ -1623,7 +1705,6 @@ export default {
                                     type: 'info',
                                 })
                             }
-                            console.log('处理中表格数据', tableDatawaitprocess.value)
                             break;
                         }
                         case 'e': {
@@ -1682,8 +1763,10 @@ export default {
 
 .box-border {
     border: 1px solid #ddd;
+    background-color: white;
     margin: 0;
     padding: 0;
+    top: 0px;
 }
 
 .el-tabs-orders {
@@ -1691,11 +1774,11 @@ export default {
 }
 
 .title-bg {
-    background-color: #ddd;
+    background-color: #4c4f53c4;
     padding: 10px;
     padding-left: 20px;
     margin-top: 0;
-    color: #767676;
+    color: #ffffff;
 }
 
 .orderquery .el-col {

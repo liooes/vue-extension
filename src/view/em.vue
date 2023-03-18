@@ -10,7 +10,7 @@
     <el-container class="page-body">
       <!-- 左侧导航 -->
       <el-aside class="page-aside" width="200px">
-        <el-menu active-text-color="#ffd04b" background-color="#545c64" class="el-menu" default-active="1"
+        <el-menu active-text-color="#ffd04b" background-color="#4C4F53" class="el-menu" default-active="1"
           text-color="#fff" @select="handleSelect">
           <el-menu-item index="1">
             <el-icon><icon-menu /></el-icon>
@@ -95,14 +95,17 @@ export default {
   display: flex;
   flex-direction: column;
 
+  margin: 0;
+  padding:0;
 }
 
 .page-header {
-  padding: 0;
-  margin: 0;
   position: relative;
   width: 100%;
   height: 60px;
+  background-color:#A9A9A9;
+  --el-header-padding: 0px;
+  background-image: url('../../../mybg.png');
 }
 
 .page-aside {
@@ -115,34 +118,30 @@ export default {
 }
 
 .page-main {
+  background-color:white;
   position: absolute;
   left: 195px;
+  top: 60px;
   margin: 0;
   right: 10px;
-  top: 70px;
   bottom: 0;
   overflow-y: scroll;
 }
 
-
 .page-logo {
   height: 50px;
-
+  margin-top: 5px;
   font-size: 24px;
   font-weight: bold;
-  color: #404040;
-  background-color: #f5f7fa;
 }
 
 .page-body {
   flex: 1;
   display: flex;
   flex-direction: row;
-
   background-color: #fff;
 
 }
-
 
 .el-menu {
   padding: 0;
