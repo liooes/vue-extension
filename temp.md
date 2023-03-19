@@ -112,12 +112,16 @@ lastUpdateTime : 1678792574000
 **target**	触发滚动的对象，这个参数要写，非常重要！！！就是根据这个参数的数值做响应
 
 
+### 重开工单属性及事件
+v-model="drawerreopenEM"
+:direction="direction" 
+@open="opendrawerreopenEM"
+@close="closedrawerreopenEM"
 
-
-
-
-
-
+当前标签位置：{{ tablelocation }}
+重开工单数量：{{ tableDatanum }}
+@click="drawerreopenEMcancelClick"
+@click="drawerreopenEMconfirmClick"
 
 
 

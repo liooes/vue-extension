@@ -105,7 +105,7 @@ export default {
   height: 60px;
   background-color:#A9A9A9;
   --el-header-padding: 0px;
-  background-image: url('../../../mybg.png');
+  background-image: url('../../public/mybg.png');
 }
 
 .page-aside {

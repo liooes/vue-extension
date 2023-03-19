@@ -54,7 +54,10 @@ app.mount("#app");
 ### 打包
 * 使用 npm run build-watch运行开发模式，将生成一个dist文件。 安装Extension Reloader，以便在热更新。 （注意，- 当您更改 manifest.json 文件时，它不会自动加载，您需要点选 extension 页面中的更新）
 * 生产模式 npm run build，并将其压缩成 zip 并部署到 chrome 商店中。
-
+# 注意
+1. 需要先 npm run build-watch
+2. 然后再 npm run build
+3. 重启浏览器再安装插件，不知道为什么一切换工单数量总是崩溃
 
 # vue-extension 使用
 
