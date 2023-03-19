@@ -113,6 +113,7 @@ lastUpdateTime : 1678792574000
 
 
 ### 重开工单属性及事件
+```
 v-model="drawerreopenEM"
 :direction="direction" 
 @open="opendrawerreopenEM"
@@ -122,6 +123,73 @@ v-model="drawerreopenEM"
 重开工单数量：{{ tableDatanum }}
 @click="drawerreopenEMcancelClick"
 @click="drawerreopenEMconfirmClick"
+```
+### 重开工单请求&响应
+#### 重开原因 reopenReason
+**撤销赔付**
+**新增异常**
+**判责错误**
+**客户原国**
+
+1. 判责待确认
+```
+heards:{
+  Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+}
+url:https://newem.800best.com/ajax/em/revokeDuty
+method:post
+
+//请求数据
+emId=16348218&revokeReason=%E6%92%A4%E9%94%80%E8%B5%94%E4%BB%98
+
+//响应数据
+{
+  "success": true,
+  "error": null,
+  "messages": null,
+   vo....很多的参数
+   voList...很多的参数
+   data...很多的参数
+  "udf1": null,
+  "strData": null
+}    
+```
+2. 已完结
+```
+heards:{
+  Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+}
+url:https://newem.800best.com/ajax/em/reopenEm
+method:post
+
+//请求数据
+orderCode=C23030744413432&
+interactTarget=carrier&
+content=%E6%92%A4%E9%94%80%E8%B5%94%E4%BB%98&
+emId=16337306&
+version=10&
+pictures=!!&
+files=
+
+orderCode=C23031251057344&
+interactTarget=%E5%AE%A2%E6%88%B7&
+content=%E6%92%A4%E9%94%80%E8%B5%94%E4%BB%98&
+pictures=%21%21&
+files=
+
+//响应
+{
+  "success": true,
+  "error": null,
+  "messages": null,
+   vo:{}...some data
+   voList...some data
+  "data": [],
+  "udf1": null,
+  "strData": null
+}
+```
+
 
 
 

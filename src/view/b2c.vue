@@ -194,16 +194,22 @@
         </template>
     </el-drawer>
     <!-- 重开工单抽屉 -->
-    <el-drawer v-model="drawerreopenEM" :direction="direction" size="20%" @open="opendrawerreopenEM"
-        @close="closedrawerreopenEM">
+    <el-drawer v-model="drawerreopenEM" :direction="direction" size="20%" @close="drawerreopenEMcancelClick">
         <template #header>
-            <h2>重开工单确认</h2>
+            <h1>重开工单确认</h1>
         </template>
         <template #default>
             <div>
-                <el-text class="mx-1" type="info">当前标签位置：{{ tablelocation }}</el-text>
+                <el-text class="mx-1" type="info">工单状态：{{ tablelocation }}</el-text>
                 <br><br>
-                <el-text class="mx-1" type="info">重开工单数量：{{ tableDatanum }}</el-text>
+                <el-text class="mx-1" type="info">重开数量：{{ tableDatanum }}</el-text>
+                <br><br>
+                <el-form-item label="重开原因:" class="mx-1">
+                    <el-select v-model="reopenReason" placeholder="请选择重开原因">
+                        <el-option v-for="item in reopenReasonOptions" :key="item.value" :label="item.label"
+                            :value="item.value" :disabled="item.disabled"></el-option>
+                    </el-select>
+                </el-form-item>
             </div>
             <div style="float: right;">
                 <br><br>
@@ -217,7 +223,6 @@
 
         </template>
     </el-drawer>
- 
 </template>
 
 <script>
@@ -247,7 +252,15 @@ const drawerreopenEM = ref(false)
 const tablelocation = ref('')
 // 重开工单数量：
 const tableDatanum = ref(0)
-
+//重开原因
+const reopenReason = ref([])
+//重开原因选项
+var reReasonOptions = [
+    { value: '撤销赔付', label: '撤销赔付' },
+    { value: '新增异常', label: '新增异常' },
+    { value: '判责错误', label: '判责错误' },
+    { value: '客户原因', label: '客户原因' },
+]
 //项目
 const project = ref('')
 //单号
@@ -381,6 +394,10 @@ const getPageListAPI = "https://newem.800best.com/ajax/em/b2c/judge/getPageList"
 const getNumListAPI = "https://newem.800best.com/ajax/em/b2c/judge/getNumList ";
 //修改类型API
 const changeIssueTypeAPI = "https://newem.800best.com/ajax/em/changeIssueType";
+//重开判责待确认API
+const revokeDutyAPI = 'https://newem.800best.com/ajax/em/revokeDuty';
+//重开已完结API
+const reopenEmAPI = 'https://newem.800best.com/ajax/em/reopenEm';
 
 //获取工单数量请求数据
 const getNumListData = {
@@ -953,17 +970,24 @@ const finishOrderdata = {
     }
 }
 
-// 通知定时100毫秒进行清理
+// 通知定时5000毫秒进行清理
 setTimeout(function (e) {
     // 这里的id只要和创建的时候设置id值一样就行了，就可以清理对应id的通知了
     chrome.notifications.clear("id");
-}, 1000);
+}, 5000);
 
 export default {
     data() {
         return {
+            //重开原因
+            reopenReason,
+            //重开原因列表
+            reopenReasonOptions:reReasonOptions,
+            //重开抽屉
             drawerreopenEM,
+            //标签位置
             tablelocation,
+            //表格数据量
             tableDatanum,
             //加载动画配置
             loadingoptions,
@@ -1028,6 +1052,8 @@ export default {
         this.issueType = this.issueTypeOptions[0].value;
         this.replystatus = this.replystatusOptions[0].value;
         this.pagesize = this.pagesizeOptions[0].value;
+        //重开工单选择器 
+        this.reopenReason = this.reopenReasonOptions[0].value;
         //加载所有项目
         this.getProject();
     },
@@ -1226,6 +1252,11 @@ export default {
                     // loading.close();
                 })
                 .catch(error => {
+                    ElNotification({
+                        title: '获取工单数量异常',
+                        message: error,
+                        type: 'error'
+                    });
                     console.error('获取工单数量', error);
                 });
         },
@@ -1279,9 +1310,14 @@ export default {
                     }
                     //结束加载
                     loading.close();
-                })
-                .catch(error => {
+                }).catch(error => {
+                    ElNotification({
+                        title: '获取待处理工单异常',
+                        message: error,
+                        type: 'error'
+                    })
                     console.error('获取待处理工单Error:', error);
+                    loading.close();
                 });
         },
         //获取处理中工单
@@ -1320,10 +1356,15 @@ export default {
                 console.log('获取处理中工单成功响应数据为：', res.data.data)
                 //加载结束
                 loading.close();
-            })
-                .catch(error => {
-                    console.log('获取处理中工单异常', error)
+            }).catch(error => {
+                ElNotification({
+                    title: '获取处理中工单异常',
+                    message: error,
+                    type: 'error'
                 })
+                console.log('获取处理中工单异常', error)
+                loading.close();
+            })
         },
         //获取判责待确认工单
         getunconfirmOrder() {
@@ -1342,6 +1383,8 @@ export default {
                     temp.push({
                         //id
                         id: res.data.data[i].id,
+                        //version
+                        version: res.data.data[i].version,
                         emCode: res.data.data[i].emCode,
                         orderCode: res.data.data[i].orderCode,
                         projectName: res.data.data[i].projectName,
@@ -1364,6 +1407,12 @@ export default {
                 //开始加载，数量为10的时候不加载
                 loading.close();
             }).catch(error => {
+                ElNotification({
+                    title: '获取判责待确认工单异常',
+                    message: error,
+                    type: 'error'
+                })
+                loading.close();
                 console.log(error)
             })
         },
@@ -1374,7 +1423,6 @@ export default {
             //替换请求内容，实现数据筛选
             this.setrequestData(finishOrderdata);
 
-            var rescount = 1;
             axios.post(getPageListAPI, finishOrderdata, {
                 headers: {
                     "Content-Type": "application/json; chartset-utf-8"
@@ -1385,6 +1433,8 @@ export default {
                     temp.push({
                         //id
                         id: res.data.data[i].id,
+                        //version
+                        version: res.data.data[i].version,
                         emCode: res.data.data[i].emCode,
                         orderCode: res.data.data[i].orderCode,
                         projectName: res.data.data[i].projectName,
@@ -1401,12 +1451,16 @@ export default {
                 }
                 this.tableDatafinish = temp;
                 //开始加载，数量为10的时候不加载
-                rescount+=1;
-                console.log('获取已完结工单',rescount);
                 loading.close();
             }).catch(error => {
-                    console.log('获取已完结工单error', error);
+                ElNotification({
+                    title: '获取已完结工单异常',
+                    message: error,
+                    type: 'error'
                 })
+                console.log('获取已完结工单异常', error);
+                loading.close();
+            })
         },
         //设置分页控件总数
         setpagetotal() {
@@ -1425,33 +1479,33 @@ export default {
             switch (activeTabs.value) {
                 case 'a': {
                     //加载我的关注数据
-                    console.log('加载我的关注数据', activeTabs.value)
+                    console.log('设置分页控件总数,我的关注数据', activeTabs.value)
                     this.pagetotal = numlistData[0];
                     break;
                 }
                 case 'b': {
-                    console.log('加载已挂起数据', activeTabs.value)
+                    console.log('设置分页控件总数,已挂起数据', activeTabs.value)
                     this.pagetotal = numlistData[1];
                     break;
                 }
                 case 'c': {
                     //加载待处理数据
-                    console.log('加载待处理数据', activeTabs.value);
+                    console.log('设置分页控件总数,待处理数据', activeTabs.value);
                     this.pagetotal = numlistData[2];
                     break;
                 }
                 case 'd': {
-                    console.log('加载处理中数据', activeTabs.value)
+                    console.log('设置分页控件总数,处理中数据', activeTabs.value)
                     this.pagetotal = numlistData[3];
                     break;
                 }
                 case 'e': {
-                    console.log('加载判责中数据', activeTabs.value)
+                    console.log('设置分页控件总数,判责中数据', activeTabs.value)
                     this.pagetotal = numlistData[4];
                     break;
                 }
                 case 'f': {
-                    console.log('加载已完结数据', activeTabs.value)
+                    console.log('设置分页控件总数,已完结数据', activeTabs.value)
                     this.pagetotal = numlistData[5];
                     break;
                 }
@@ -1618,9 +1672,7 @@ export default {
                                 }
                                 //发送post请求修改类型
                                 axios.post(changeIssueTypeAPI, qs.stringify(temp), {
-                                    headers: {
                                         headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
-                                    }
                                 }).then(res => {
                                     // 响应数据总数
                                     rescount += 1;
@@ -1725,15 +1777,14 @@ export default {
                 }
                 //将抽屉关闭
                 drawerchangeIssue.value = false
+            }).catch(error => {
+                // catch error
+                console.log(error);
             })
-                .catch(error => {
-                    // catch error
-                    console.log(error);
-                })
             console.log('点击了确认修改...')
         },
         //打开重开工单抽屉响应
-        opendrawerreopenEM(){
+        opendrawerreopenEM() {
             console.log('打开重开工单抽屉响应')
             //加载对应标签数据
             switch (activeTabs.value) {
@@ -1743,6 +1794,10 @@ export default {
                     //设置标签位置和数量
                     this.tablelocation = '判责中';
                     this.tableDatanum = this.tableDataunconfirm.length;
+
+                    //判责中重开选项少一个客户原因,需要移除,在元素末端，后续关闭抽屉需要重新添加
+                    this.reopenReasonOptions.pop();
+                    console.log('reReasonOptions长度', reReasonOptions.length)
                     break;
                 }
                 case 'f': {
@@ -1756,42 +1811,165 @@ export default {
                 default: {
                     drawerreopenEM.value = false;
                     ElNotification({
-                        title:'提示',
-                        message:'请选择判责中或已完结工单标签哦~',
-                        type:'info'
+                        title: '提示',
+                        message: '请选择判责中或已完结工单标签哦~',
+                        type: 'info'
                     })
                     break;
                 }
             }
         },
-        //关闭重开工单抽屉响应
-        closedrawerreopenEM(){
-            drawerreopenEM.value = false;
-            // ElNotification({
-            //     title: '取消重开',
-            //     message: '您取消重开工单了~',
-            //     type: 'info',
-            // })
-            console.log('取消重开工单...')
-        },
         //取消重开工单响应
-        drawerreopenEMcancelClick(){
+        drawerreopenEMcancelClick() {
+            //重开选项新增客户原因，因为打开重开抽屉，在判责中去掉了，但是要判断数组长度等于3才添加
+            if (this.reopenReasonOptions.length <= 3) {
+                this.reopenReasonOptions.push({ value: '客户原因', label: '客户原因' })
+            }
             drawerreopenEM.value = false;
-            ElNotification({
-                title: '取消重开',
-                message: '您取消重开工单了~',
-                type: 'info',
-            })
-            console.log('取消重开工单...')
+            console.log('取消重开工单，关闭抽屉...')
         },
         //确认重开工单响应
-        drawerreopenEMconfirmClick(){
-            console.log('开始重开')
-            ElNotification({
-                title: '开始重开',
-                message: '已为您模拟重开工单了~',
-                type: 'info',
-            })
+        drawerreopenEMconfirmClick() {
+            //获取需要重开的列表，tableData里的数据，需要确定两个条件 
+            //1.当前用户tabs标签停留的位置
+            //2.根据停留位置获取对应的 tableData
+            switch (activeTabs.value) {
+                //判责待确认
+                case 'e': {
+                    //列表要有数据才可以重开
+                    if (this.tableDataunconfirm.length > 0) {
+                        //修改结果数据，用于通知用户修改成功了多少条
+                        var reopenCount = 0;
+                        //响应数据总数，用于所有响应结束后的通知和关闭加载
+                        var rescount = 0;
+
+                        //遍历表格，修改类型，要修改的数据不能为空
+                        for (let i = 0; i < this.tableDataunconfirm.length; i++) {
+                            //请求数据
+                            // emId=16348218&
+                            // revokeReason=%E6%92%A4%E9%94%80%E8%B5%94%E4%BB%98
+                            var temp = {
+                                emId: this.tableDataunconfirm[i].id,
+                                revokeReason: reopenReason.value
+                            }
+                            console.log('reqdata', qs.stringify(temp))
+                            //发送post请求修改类型
+                            axios.post(revokeDutyAPI, qs.stringify(temp), {
+                                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+                            }).then(res => {
+                                // 响应数据总数
+                                rescount += 1;
+                                //存储修改成功的数量
+                                if (res.data.success === true) {
+                                    reopenCount = reopenCount + 1;
+                                }
+                                //所有响应结束后通知
+                                if (rescount === this.tableDataunconfirm.length) {
+                                    ElNotification({
+                                        title: '重开工单',
+                                        message: '已重开' + reopenCount + '条工单',
+                                        type: 'info',
+                                    })
+                                }
+                            }).catch(error => {
+                                console.log(error)
+                            })
+                            console.log('reqdata', qs.stringify(temp))
+                        }
+                    } else {
+                        ElNotification({
+                            title: '重开工单',
+                            message: '判责待确认列表为空哦，请搜索要重开的工单呢~',
+                            type: 'info',
+                        })
+                    }
+                    break;
+                }
+                //已完结
+                case 'f': {
+                    //列表要有数据才可以重开
+                    if (this.tableDatafinish.length > 0) {
+                        //修改结果数据，用于通知用户修改成功了多少条
+                        var reopenCount = 0;
+                        //响应数据总数，用于所有响应结束后的通知和关闭加载
+                        var rescount = 0;
+
+                        //遍历表格，修改类型，要修改的数据不能为空
+                        for (let i = 0; i < this.tableDatafinish.length; i++) {
+                            //请求数据
+                            // orderCode=C23030744413432&
+                            // interactTarget=carrier&
+                            // content=%E6%92%A4%E9%94%80%E8%B5%94%E4%BB%98&
+                            // emId=16337306&
+                            // version=10&
+                            // pictures=!!&
+                            // files=
+                            var temp = {
+                                orderCode: this.tableDatafinish[i].orderCode,
+                                //这里需要转换一下类型
+                                interactTarget: this.tableDatafinish[i].interactTarget === '承运商' ? 'carrier' :
+                                    this.tableDatafinish[i].interactTarget === '客户' ? 'customer' :
+                                        this.tableDatafinish[i].interactTarget === '仓库' ? 'warehouser' : '',
+
+                                content: reopenReason.value,
+                                emId: this.tableDatafinish[i].id,
+                                version: this.tableDatafinish[i].version,
+                                pictures: '',
+                                files: '',
+                            }
+                            //发送post请求修改类型
+                            axios.post(reopenEmAPI, qs.stringify(temp), {
+                                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+                            }).then(res => {
+                                // 响应数据总数
+                                rescount += 1;
+                                //存储修改成功的数量
+                                if (res.data.success === true) {
+                                    reopenCount = reopenCount + 1;
+                                }
+                                //所有响应结束后通知
+                                if (rescount === this.tableDatafinish.length) {
+                                    ElNotification({
+                                        title: '重开已完结工单',
+                                        message: '已重开' + reopenCount + '条工单',
+                                        type: 'info',
+                                    })
+                                }
+                            }).catch(error => {
+                                ElNotification({
+                                    title: 'error',
+                                    message: error,
+                                    type: 'error',
+                                })
+                                console.log(error)
+                            })
+                            console.log('reqdata', qs.stringify(temp))
+                        }
+                        ElNotification({
+                            title: '重开工单',
+                            message: '已为您提交重开工单任务了~',
+                            type: 'info',
+                        })
+                    } else {
+                        ElNotification({
+                            title: '重开工单',
+                            message: '已完结列表为空哦，请搜索要重开的工单呢~',
+                            type: 'info',
+                        })
+                    }
+                    break;
+                }
+                default: {
+                    ElNotification({
+                        title: '重开工单',
+                        message: '判责待确认和已完结的工单才能重开哦~',
+                        type: 'warning',
+                    })
+                    console.log('判责待确认和已完结的工单才能重开哦~')
+                    break;
+                }
+            }
+            console.log('重开工单')
             drawerreopenEM.value = false;
         },
     },
@@ -1802,10 +1980,11 @@ export default {
 
 
 <style scoped>
-.mx-1{
-    font-size: 20px;
-    color: tomato;
+.mx-1 {
+    font-size: 16px;
+    font-weight: 500;
 }
+
 .pagesize {
     padding-bottom: 8px;
 }
