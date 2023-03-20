@@ -2,8 +2,11 @@
     <!-- 工单查询 -->
     <div class="box-border">
         <el-row style="top:0px;">
-            <el-col>
-                <h1 class="title-bg">工单查询</h1>
+            <el-col> 
+                <h3 class="title-bg">
+                      <Search style=" width: 1.3em;height: 1.3em;"/> 
+                     工单查询
+                </h3>
             </el-col>
         </el-row>
         <el-row class="orderquery">
@@ -74,12 +77,13 @@
                             <el-button color="#4527a0">重开工单</el-button>
                             <el-button color="#ad1457">修改状态</el-button>
                             <el-button color="#6a1b9a" :icon="Search"   @click="searchOrder">搜索工单</el-button> -->
-                            <el-button disabled>发送信息</el-button>
-                            <el-button type="primary" @click="opendrawerchangeIssue">修改类型</el-button>
-                            <el-button disabled>完结工单</el-button>
-                            <el-button type="primary" @click="opendrawerreopenEM">重开工单</el-button>
-                            <el-button disabled>修改状态</el-button>
-                            <el-button type="primary" :icon="Search" @click="searchOrder">搜索工单</el-button>
+                            <el-button disabled><ChatLineRound class="icon"/> 发送信息</el-button>
+                            <el-button type="primary" @click="opendrawerchangeIssue"><Edit class="icon"/>修改类型</el-button>
+                            <el-button disabled><CircleCheck class="icon"/>完结工单</el-button>
+                            <el-button type="primary" @click="opendrawerreopenEM"><RefreshLeft class="icon"/>重开工单</el-button>
+                            <el-button type="primary" @click="draweropendrawerchanageTodayFollowType"><Edit class="icon"/>修改状态</el-button>
+                            <el-button type="primary" @click="searchOrder"><Search class="icon"/>搜索工单
+                            </el-button>
                         </el-form-item>
                     </el-col>
                 </el-row>
@@ -223,6 +227,33 @@
 
         </template>
     </el-drawer>
+    <!-- 修改状态抽屉 -->
+    <el-drawer v-model="drawerchanageTodayFollowType" :direction="direction" size="20%">
+        <template #header>
+            <h2>请选择要修改的工单进展</h2>
+        </template>
+        <template #default>
+            <div>
+                <br><br>
+                <el-form-item label="工单进展:" class="mx-1">
+                    <el-select v-model="chanageTodayFollowType" placeholder="请选择工单进展">
+                        <el-option v-for="item in chanageTodayFollowTypeOptions" :key="item.value" :label="item.label"
+                            :value="item.value" :disabled="item.disabled"></el-option>
+                    </el-select>
+                </el-form-item>
+            </div>
+            <div style="float: right;">
+                <br><br>
+                <!-- 用户点击取消按钮后关闭抽屉 -->
+                <el-button @click="chanageTodayFollowTypecancelClick">取消</el-button>
+                <!-- 用户点击确认修改状态后的响应 -->
+                <el-button type="primary" @click="chanageTodayFollowTypeconfirmClick">确定</el-button>
+            </div>
+        </template>
+        <template #footer>
+
+        </template>
+    </el-drawer>
 </template>
 
 <script>
@@ -232,7 +263,7 @@ import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import { ElLoading } from 'element-plus'
-
+ 
 //全屏加载动画配置参数
 const loadingoptions = {
     target: '.page-main',
@@ -261,6 +292,20 @@ var reReasonOptions = [
     { value: '判责错误', label: '判责错误' },
     { value: '客户原因', label: '客户原因' },
 ]
+
+//修改状态抽屉
+const drawerchanageTodayFollowType = ref(false)
+const chanageTodayFollowType = ref([])
+const chanageTodayFollowTypeOptions = [
+    {value:'无实质性进展',label:'无实质性进展'},
+    {value:'疫情影响',label:'疫情影响'},
+    {value:'拦截成功',label:'拦截成功'},
+    {value:'待退仓',label:'待退仓'},
+    {value:'已退回',label:'已退回'},
+    {value:'待核实退仓表',label:'待核实退仓表'},
+    {value:'待客户提供凭证',label:'待客户提供凭证'},
+]
+
 //项目
 const project = ref('')
 //单号
@@ -308,7 +353,7 @@ const finishlabel = ref('已完结(0)')
 //创建日期，左侧快速选择日期
 const pkvla = [
     {
-        text: 'Last week',
+        text: '最近一周',
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -317,7 +362,7 @@ const pkvla = [
         },
     },
     {
-        text: 'Last month',
+        text: '最近一个月',
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -326,7 +371,7 @@ const pkvla = [
         },
     },
     {
-        text: 'Last 3 months',
+        text: '最近三个月',
         value: () => {
             const end = new Date()
             const start = new Date()
@@ -398,6 +443,8 @@ const changeIssueTypeAPI = "https://newem.800best.com/ajax/em/changeIssueType";
 const revokeDutyAPI = 'https://newem.800best.com/ajax/em/revokeDuty';
 //重开已完结API
 const reopenEmAPI = 'https://newem.800best.com/ajax/em/reopenEm';
+//修改工单进展API
+const chanageTodayFollowTypeAPI = 'https://newem.800best.com/ajax/em/chanageTodayFollowType';
 
 //获取工单数量请求数据
 const getNumListData = {
@@ -979,6 +1026,11 @@ setTimeout(function (e) {
 export default {
     data() {
         return {
+            //修改状态抽屉
+            drawerchanageTodayFollowType,
+            //修改状态抽屉集合
+            chanageTodayFollowType,
+            chanageTodayFollowTypeOptions,
             //重开原因
             reopenReason,
             //重开原因列表
@@ -1044,6 +1096,9 @@ export default {
             shortcuts: pkvla,
         }
     },
+    // components:{
+    //     Search
+    // },
     created() {
         //设置默认选中值
         this.createtime = this.createtimedefaultvalue;
@@ -1054,6 +1109,8 @@ export default {
         this.pagesize = this.pagesizeOptions[0].value;
         //重开工单选择器 
         this.reopenReason = this.reopenReasonOptions[0].value;
+        //修改工单状态选择器
+        this.chanageTodayFollowType = this.chanageTodayFollowTypeOptions[0].value;
         //加载所有项目
         this.getProject();
     },
@@ -1972,6 +2029,135 @@ export default {
             console.log('重开工单')
             drawerreopenEM.value = false;
         },
+        //抽屉关闭 取消修改工单状态
+        chanageTodayFollowTypecancelClick(){
+            console.log('抽屉关闭 取消修改工单状态')
+            this.drawerchanageTodayFollowType = false;
+        },
+        //抽屉打开 
+        draweropendrawerchanageTodayFollowType(){
+            switch (activeTabs.value) {
+                //待处理
+                case 'c': {
+                    this.drawerchanageTodayFollowType = true;
+                    break;
+                }
+                //处理中
+                case 'd': {
+                    this.drawerchanageTodayFollowType = true;
+                    break;
+                }
+                default: {
+                    ElNotification({
+                        title: '修改工单进展',
+                        message: '请选择待处理或处理中工单~',
+                        type: 'warning',
+                    }) 
+                    break;
+                }
+            } 
+        },
+        //抽屉打开 按下确定修改工单状态
+        chanageTodayFollowTypeconfirmClick(){
+            console.log('抽屉打开 按下确定修改工单状态')
+            console.log('当前选中',chanageTodayFollowType.value)
+            switch (activeTabs.value) {
+                //待处理
+                case 'c': {
+                    //表格有数据才可以修改
+                    if(this.tableDatawaitprocess.length>0){
+                        // const loading = ElLoading.service(loadingoptions);
+                        var successCount =0;
+                        var resCount =0;
+                        //遍历表格发送
+                        for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
+                            //设置要发送的数据
+                            var temp  ={
+                                id:this.tableDatawaitprocess[i].id,
+                                todayFollowProgress:chanageTodayFollowType.value
+                            } 
+                            axios.post(chanageTodayFollowTypeAPI,qs.stringify(temp),{
+                                headers:{
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                }
+                            }).then(res =>{ 
+                                resCount += 1;
+                                if(res.data.success === true){
+                                    successCount+=1;
+                                }
+                                if(resCount === this.tableDatawaitprocess.length){
+                                    // loading.close();
+                                    ElNotification({
+                                        title:'修改工单进展',
+                                        message:'已修改'+successCount+'条为：'+chanageTodayFollowType.value
+                                    })
+                                }
+                            }).catch(error =>{
+                                console.log(error)
+                                ElNotification({
+                                    title:'error',
+                                    message:error,
+                                    type:'warning'
+                                })
+                                // loading.close();
+                            })
+                            console.log('要发送的数据',qs.stringify(temp))                           
+                        }
+                        
+                    }else{
+                        ElNotification({title:'修改工单进展',message:'待处理表格数据为空,请搜索要修改的工单哦~',type:'warning'})
+                    }
+                    break;
+                }
+                //处理中
+                case 'd': {
+                    //表格有数据才可以修改
+                    if(this.tableDataprocessing.length>0){
+                        // const loading = ElLoading.service(loadingoptions);
+                        var successCount =0;
+                        var resCount =0;
+                         //遍历表格发送
+                         for (let i = 0; i < this.tableDataprocessing.length; i++) {
+                            //设置要发送的数据
+                            var temp  ={
+                                id:this.tableDataprocessing[i].id,
+                                todayFollowProgress:chanageTodayFollowType.value
+                            } 
+                            //发送请求
+                            axios.post(chanageTodayFollowTypeAPI,qs.stringify(temp),{
+                                headers:{
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                }
+                            }).then(res =>{ 
+                                resCount += 1;
+                                if(res.data.success === true){
+                                    successCount+=1;
+                                }
+                                if(resCount === this.tableDataprocessing.length){
+                                    // loading.close();
+                                    ElNotification({title:'修改工单进展',message:'已修改'+successCount+'条为：'+chanageTodayFollowType.value})
+                                }
+                            }).catch(error =>{
+                                console.log(error)
+                                ElNotification({title:'error', message:error,type:'warning'})
+                                // loading.close();
+                            })
+                            console.log('要发送的数据',qs.stringify(temp))                           
+                        }
+                    }else{
+                        ElNotification({title:'修改工单进展',message:'处理中表格数据为空,请搜索要修改的工单哦~',type:'warning'})
+                    }
+                    break;
+                }
+                default: {
+                    ElNotification({title:'修改工单进展', message:'请选择待处理或处理中工单',type:'warning'})
+                    break;
+                }
+            }
+            //执行完任务后关闭抽屉
+            this.drawerchanageTodayFollowType = false;
+        },
+
     },
     mounted() {
     }
@@ -1980,6 +2166,11 @@ export default {
 
 
 <style scoped>
+.icon{
+    margin-right: 3px;
+    width: 1.2em;
+    height: 1.2em;
+}
 .mx-1 {
     font-size: 16px;
     font-weight: 500;
@@ -2013,10 +2204,13 @@ export default {
 
 .title-bg {
     background-color: #4c4f53c4;
-    padding: 10px;
-    padding-left: 20px;
-    margin-top: 0;
+    padding: 5px;
+    padding-left: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    margin-top:0; 
     color: #ffffff;
+    font-weight:bold;
 }
 
 .orderquery .el-col {

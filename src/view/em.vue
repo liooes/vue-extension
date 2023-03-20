@@ -13,23 +13,21 @@
         <el-menu active-text-color="#ffd04b" background-color="#4C4F53" class="el-menu" default-active="1"
           text-color="#fff" @select="handleSelect">
           <el-menu-item index="1">
-            <el-icon><icon-menu /></el-icon>
+            <el-icon>
+              <document />
+            </el-icon>
             <span>B2C工单</span>
           </el-menu-item>
           <el-menu-item index="2">
-            <el-icon><icon-menu /></el-icon>
+            <el-icon><Aim /></el-icon>
             <span>异常检测</span>
           </el-menu-item>
           <el-menu-item index="3" disabled>
-            <el-icon>
-              <document />
-            </el-icon>
+            <el-icon><Coffee /></el-icon>
             <span>物流查询</span>
           </el-menu-item>
           <el-menu-item index="4" disabled>
-            <el-icon>
-              <document />
-            </el-icon>
+            <el-icon><Grid /></el-icon>
             <span>数据看板</span>
           </el-menu-item>
           <el-menu-item index="5">
