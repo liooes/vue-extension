@@ -2,10 +2,10 @@
     <!-- 工单查询 -->
     <div class="box-border">
         <el-row style="top:0px;">
-            <el-col> 
+            <el-col>
                 <h3 class="title-bg">
-                      <Search style=" width: 1.3em;height: 1.3em;"/> 
-                     工单查询
+                    <Search style=" width: 1.3em;height: 1.3em;" />
+                    工单查询
                 </h3>
             </el-col>
         </el-row>
@@ -77,12 +77,23 @@
                             <el-button color="#4527a0">重开工单</el-button>
                             <el-button color="#ad1457">修改状态</el-button>
                             <el-button color="#6a1b9a" :icon="Search"   @click="searchOrder">搜索工单</el-button> -->
-                            <el-button disabled><ChatLineRound class="icon"/> 发送信息</el-button>
-                            <el-button type="primary" @click="opendrawerchangeIssue"><Edit class="icon"/>修改类型</el-button>
-                            <el-button disabled><CircleCheck class="icon"/>完结工单</el-button>
-                            <el-button type="primary" @click="opendrawerreopenEM"><RefreshLeft class="icon"/>重开工单</el-button>
-                            <el-button type="primary" @click="draweropendrawerchanageTodayFollowType"><Edit class="icon"/>修改状态</el-button>
-                            <el-button type="primary" @click="searchOrder"><Search class="icon"/>搜索工单
+                            <el-button type="primary" @click="opendrawersendMsg">
+                                <ChatLineRound class="icon" /> 发送信息
+                            </el-button>
+                            <el-button type="primary" @click="opendrawerchangeIssue">
+                                <Edit class="icon" />修改类型
+                            </el-button>
+                            <el-button disabled>
+                                <CircleCheck class="icon" />完结工单
+                            </el-button>
+                            <el-button type="primary" @click="opendrawerreopenEM">
+                                <RefreshLeft class="icon" />重开工单
+                            </el-button>
+                            <el-button type="primary" @click="draweropendrawerchanageTodayFollowType">
+                                <Edit class="icon" />修改状态
+                            </el-button>
+                            <el-button type="primary" @click="searchOrder">
+                                <Search class="icon" />搜索工单
                             </el-button>
                         </el-form-item>
                     </el-col>
@@ -254,6 +265,34 @@
 
         </template>
     </el-drawer>
+
+    <!-- 发送信息抽屉 -->
+    <el-drawer v-model="drawersendMsg" :direction="direction" size="30%">
+        <template #header>
+            <h2>请输入要发送的信息</h2>
+        </template>
+        <template #default>
+            <div>
+                <el-text class="mx-1" type="info">工单状态：{{ tablelocation }}</el-text>
+                <br><br>
+                <el-text class="mx-1" type="info">发送数量：{{ tableDatanum }}</el-text>
+                <br><br>
+                <el-form-item label="发送内容:" class="mx-1">
+                    <el-input v-model="inputsendMsg" clearable placeholder="Please input message data..." />
+                </el-form-item>
+            </div>
+            <div style="float: right;">
+                <br><br>
+                <!-- 用户点击取消按钮后关闭抽屉 -->
+                <el-button @click="sendMsgcancelClick">取消</el-button>
+                <!-- 用户点击确认按钮后的响应 -->
+                <el-button type="primary" @click="sendMsgconfirmClick">确定</el-button>
+            </div>
+        </template>
+        <template #footer>
+
+        </template>
+    </el-drawer>
 </template>
 
 <script>
@@ -263,7 +302,7 @@ import { ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ElNotification } from 'element-plus'
 import { ElLoading } from 'element-plus'
- 
+
 //全屏加载动画配置参数
 const loadingoptions = {
     target: '.page-main',
@@ -271,6 +310,10 @@ const loadingoptions = {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.3)',
 };
+//发送信息抽屉
+const drawersendMsg = ref(false)
+const inputsendMsg = ref('')
+//
 
 //修改类型抽屉
 const drawerchangeIssue = ref(false)
@@ -297,13 +340,13 @@ var reReasonOptions = [
 const drawerchanageTodayFollowType = ref(false)
 const chanageTodayFollowType = ref([])
 const chanageTodayFollowTypeOptions = [
-    {value:'无实质性进展',label:'无实质性进展'},
-    {value:'疫情影响',label:'疫情影响'},
-    {value:'拦截成功',label:'拦截成功'},
-    {value:'待退仓',label:'待退仓'},
-    {value:'已退回',label:'已退回'},
-    {value:'待核实退仓表',label:'待核实退仓表'},
-    {value:'待客户提供凭证',label:'待客户提供凭证'},
+    { value: '无实质性进展', label: '无实质性进展' },
+    { value: '疫情影响', label: '疫情影响' },
+    { value: '拦截成功', label: '拦截成功' },
+    { value: '待退仓', label: '待退仓' },
+    { value: '已退回', label: '已退回' },
+    { value: '待核实退仓表', label: '待核实退仓表' },
+    { value: '待客户提供凭证', label: '待客户提供凭证' },
 ]
 
 //项目
@@ -445,6 +488,10 @@ const revokeDutyAPI = 'https://newem.800best.com/ajax/em/revokeDuty';
 const reopenEmAPI = 'https://newem.800best.com/ajax/em/reopenEm';
 //修改工单进展API
 const chanageTodayFollowTypeAPI = 'https://newem.800best.com/ajax/em/chanageTodayFollowType';
+//发送信息API
+const sendMsgAPI = 'https://newem.800best.com/ajax/em/servicer/sendMsg';
+//更新工单状态API
+const updateStatusAPI = 'https://newem.800best.com/ajax/em/updateStatus';
 
 //获取工单数量请求数据
 const getNumListData = {
@@ -1026,6 +1073,8 @@ setTimeout(function (e) {
 export default {
     data() {
         return {
+            inputsendMsg,
+            drawersendMsg,
             //修改状态抽屉
             drawerchanageTodayFollowType,
             //修改状态抽屉集合
@@ -1034,7 +1083,7 @@ export default {
             //重开原因
             reopenReason,
             //重开原因列表
-            reopenReasonOptions:reReasonOptions,
+            reopenReasonOptions: reReasonOptions,
             //重开抽屉
             drawerreopenEM,
             //标签位置
@@ -1729,7 +1778,7 @@ export default {
                                 }
                                 //发送post请求修改类型
                                 axios.post(changeIssueTypeAPI, qs.stringify(temp), {
-                                        headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+                                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
                                 }).then(res => {
                                     // 响应数据总数
                                     rescount += 1;
@@ -1912,7 +1961,7 @@ export default {
                             console.log('reqdata', qs.stringify(temp))
                             //发送post请求修改类型
                             axios.post(revokeDutyAPI, qs.stringify(temp), {
-                                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+                                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
                             }).then(res => {
                                 // 响应数据总数
                                 rescount += 1;
@@ -1976,7 +2025,7 @@ export default {
                             }
                             //发送post请求修改类型
                             axios.post(reopenEmAPI, qs.stringify(temp), {
-                                    headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
+                                headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" }
                             }).then(res => {
                                 // 响应数据总数
                                 rescount += 1;
@@ -2030,12 +2079,12 @@ export default {
             drawerreopenEM.value = false;
         },
         //抽屉关闭 取消修改工单状态
-        chanageTodayFollowTypecancelClick(){
+        chanageTodayFollowTypecancelClick() {
             console.log('抽屉关闭 取消修改工单状态')
             this.drawerchanageTodayFollowType = false;
         },
         //抽屉打开 
-        draweropendrawerchanageTodayFollowType(){
+        draweropendrawerchanageTodayFollowType() {
             switch (activeTabs.value) {
                 //待处理
                 case 'c': {
@@ -2052,112 +2101,292 @@ export default {
                         title: '修改工单进展',
                         message: '请选择待处理或处理中工单~',
                         type: 'warning',
-                    }) 
+                    })
                     break;
                 }
-            } 
+            }
         },
         //抽屉打开 按下确定修改工单状态
-        chanageTodayFollowTypeconfirmClick(){
+        chanageTodayFollowTypeconfirmClick() {
             console.log('抽屉打开 按下确定修改工单状态')
-            console.log('当前选中',chanageTodayFollowType.value)
+            console.log('当前选中', chanageTodayFollowType.value)
             switch (activeTabs.value) {
                 //待处理
                 case 'c': {
                     //表格有数据才可以修改
-                    if(this.tableDatawaitprocess.length>0){
+                    if (this.tableDatawaitprocess.length > 0) {
                         // const loading = ElLoading.service(loadingoptions);
-                        var successCount =0;
-                        var resCount =0;
+                        var successCount = 0;
+                        var resCount = 0;
                         //遍历表格发送
                         for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
                             //设置要发送的数据
-                            var temp  ={
-                                id:this.tableDatawaitprocess[i].id,
-                                todayFollowProgress:chanageTodayFollowType.value
-                            } 
-                            axios.post(chanageTodayFollowTypeAPI,qs.stringify(temp),{
-                                headers:{
+                            var temp = {
+                                id: this.tableDatawaitprocess[i].id,
+                                todayFollowProgress: chanageTodayFollowType.value
+                            }
+                            axios.post(chanageTodayFollowTypeAPI, qs.stringify(temp), {
+                                headers: {
                                     'Content-Type': 'application/x-www-form-urlencoded'
                                 }
-                            }).then(res =>{ 
+                            }).then(res => {
                                 resCount += 1;
-                                if(res.data.success === true){
-                                    successCount+=1;
+                                if (res.data.success === true) {
+                                    successCount += 1;
                                 }
-                                if(resCount === this.tableDatawaitprocess.length){
+                                if (resCount === this.tableDatawaitprocess.length) {
                                     // loading.close();
                                     ElNotification({
-                                        title:'修改工单进展',
-                                        message:'已修改'+successCount+'条为：'+chanageTodayFollowType.value
+                                        title: '修改工单进展',
+                                        message: '已修改' + successCount + '条为：' + chanageTodayFollowType.value
                                     })
                                 }
-                            }).catch(error =>{
+                            }).catch(error => {
                                 console.log(error)
                                 ElNotification({
-                                    title:'error',
-                                    message:error,
-                                    type:'warning'
+                                    title: 'error',
+                                    message: error,
+                                    type: 'warning'
                                 })
                                 // loading.close();
                             })
-                            console.log('要发送的数据',qs.stringify(temp))                           
+                            console.log('要发送的数据', qs.stringify(temp))
                         }
-                        
-                    }else{
-                        ElNotification({title:'修改工单进展',message:'待处理表格数据为空,请搜索要修改的工单哦~',type:'warning'})
+
+                    } else {
+                        ElNotification({ title: '修改工单进展', message: '待处理表格数据为空,请搜索要修改的工单哦~', type: 'warning' })
                     }
                     break;
                 }
                 //处理中
                 case 'd': {
                     //表格有数据才可以修改
-                    if(this.tableDataprocessing.length>0){
+                    if (this.tableDataprocessing.length > 0) {
                         // const loading = ElLoading.service(loadingoptions);
-                        var successCount =0;
-                        var resCount =0;
-                         //遍历表格发送
-                         for (let i = 0; i < this.tableDataprocessing.length; i++) {
+                        var successCount = 0;
+                        var resCount = 0;
+                        //遍历表格发送
+                        for (let i = 0; i < this.tableDataprocessing.length; i++) {
                             //设置要发送的数据
-                            var temp  ={
-                                id:this.tableDataprocessing[i].id,
-                                todayFollowProgress:chanageTodayFollowType.value
-                            } 
+                            var temp = {
+                                id: this.tableDataprocessing[i].id,
+                                todayFollowProgress: chanageTodayFollowType.value
+                            }
                             //发送请求
-                            axios.post(chanageTodayFollowTypeAPI,qs.stringify(temp),{
-                                headers:{
+                            axios.post(chanageTodayFollowTypeAPI, qs.stringify(temp), {
+                                headers: {
                                     'Content-Type': 'application/x-www-form-urlencoded'
                                 }
-                            }).then(res =>{ 
+                            }).then(res => {
                                 resCount += 1;
-                                if(res.data.success === true){
-                                    successCount+=1;
+                                if (res.data.success === true) {
+                                    successCount += 1;
                                 }
-                                if(resCount === this.tableDataprocessing.length){
+                                if (resCount === this.tableDataprocessing.length) {
                                     // loading.close();
-                                    ElNotification({title:'修改工单进展',message:'已修改'+successCount+'条为：'+chanageTodayFollowType.value})
+                                    ElNotification({ title: '修改工单进展', message: '已修改' + successCount + '条为：' + chanageTodayFollowType.value })
                                 }
-                            }).catch(error =>{
+                            }).catch(error => {
                                 console.log(error)
-                                ElNotification({title:'error', message:error,type:'warning'})
+                                ElNotification({ title: 'error', message: error, type: 'warning' })
                                 // loading.close();
                             })
-                            console.log('要发送的数据',qs.stringify(temp))                           
+                            console.log('要发送的数据', qs.stringify(temp))
                         }
-                    }else{
-                        ElNotification({title:'修改工单进展',message:'处理中表格数据为空,请搜索要修改的工单哦~',type:'warning'})
+                    } else {
+                        ElNotification({ title: '修改工单进展', message: '处理中表格数据为空,请搜索要修改的工单哦~', type: 'warning' })
                     }
                     break;
                 }
                 default: {
-                    ElNotification({title:'修改工单进展', message:'请选择待处理或处理中工单',type:'warning'})
+                    ElNotification({ title: '修改工单进展', message: '请选择待处理或处理中工单', type: 'warning' })
                     break;
                 }
             }
             //执行完任务后关闭抽屉
             this.drawerchanageTodayFollowType = false;
         },
+        //抽屉打开，发送信息
+        opendrawersendMsg() {
+            switch (activeTabs.value) {
+                //待处理
+                case 'c': {
+                    this.drawersendMsg = true;
+                    //设置标签位置和数量
+                    this.tablelocation = '待处理';
+                    this.tableDatanum = this.tableDatawaitprocess.length;
+                    break;
+                }
+                //处理中
+                case 'd': {
+                    this.drawersendMsg = true;
+                    //设置标签位置和数量
+                    this.tablelocation = '处理中';
+                    this.tableDatanum = this.tableDataprocessing.length;
+                    break;
+                }
+                default: {
+                    ElNotification({
+                        title: '发送信息',
+                        message: '请选择待处理或处理中工单~',
+                        type: 'warning',
+                    })
+                    break;
+                }
+            }
+        },
+        //抽屉关闭 取消发送信息
+        sendMsgcancelClick() {
+            console.log('抽屉关闭 取消发送信息')
+            this.drawersendMsg = false;
+        },
+        //抽屉打开，确定发送信息
+        sendMsgconfirmClick() {
+            switch (activeTabs.value) {
+                //待处理，发送成功后更新工单状态为处理中
+                case 'c': {
+                    if (this.tableDatawaitprocess.length > 0) {
+                        const loading = ElLoading.service(loadingoptions);
+                        var successCount = 0;
+                        var resCount = 0;
+                        var updateStatusResCount = 0;
+                        var updateStatusSuccessCount = 0;
 
+                        for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
+                            var temp = {
+                                id: this.tableDatawaitprocess[i].id,
+                                showColor: 11,
+                                showColorServicer: 0,
+                                content: inputsendMsg.value,
+                                pictures: '',
+                                files: ''
+                            }
+                            // console.log('发送信息内容',qs.stringify(temp))
+                            axios.post(sendMsgAPI, temp, {
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+                            }).then(res => {
+                                resCount += 1;
+                                //发送信息成功后，发送更新工单状态请求
+                                if (res.data.success === true) {
+                                    successCount += 1;
+                                    //更新对应工单的状态
+                                    var updateStatustemp = {
+                                        id: this.tableDatawaitprocess[i].id,
+                                        status: 'processing'
+                                    }
+                                    axios.post(updateStatusAPI, qs.stringify(updateStatustemp), {
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+                                    }).then(res => {
+                                        updateStatusResCount += 1;
+                                        if (res.data.success === true) {
+                                            updateStatusSuccessCount += 1;
+                                        }
+                                        if (successCount === updateStatusResCount) {
+                                            //发送信息，更新状态成功数量通知
+                                            ElNotification({
+                                                title: '发送信息',
+                                                message: '已更新' + updateStatusSuccessCount + '条信息为处理中',
+                                                type: 'info',
+                                            })
+                                        }
+                                    }).catch(error => {
+                                        ElNotification({
+                                            title: 'error',
+                                            message: error,
+                                            type: 'error',
+                                        })
+                                        loading.close();
+                                    })
+                                }
+                                if (this.tableDatawaitprocess.length === resCount) {
+                                    //发送信息，成功数量通知
+                                    ElNotification({
+                                        title: '发送信息',
+                                        message: '已发送' + successCount + '条信息',
+                                        type: 'info',
+                                    })
+                                    loading.close();
+                                }
+                            }).catch(error => {
+                                ElNotification({
+                                    title: 'error',
+                                    message: error,
+                                    type: 'error',
+                                })
+                                loading.close();
+                            })
+                        }
+                    } else {
+                        ElNotification({
+                            title: '发送信息',
+                            message: '处理中工单为空，请搜索要发送的工单哦~',
+                            type: 'warning',
+                        })
+                    }
+                    break;
+                }
+                //处理中
+                case 'd': {
+                    if (this.tableDataprocessing.length > 0) {
+                        const loading = ElLoading.service(loadingoptions);
+                        var successCount = 0;
+                        var resCount = 0;
+
+                        for (let i = 0; i < this.tableDataprocessing.length; i++) {
+                            var temp = {
+                                id: this.tableDataprocessing[i].id,
+                                showColor: 11,
+                                showColorServicer: 0,
+                                content: inputsendMsg.value,
+                                pictures: '',
+                                files: ''
+                            }
+                            console.log('发送信息内容', qs.stringify(temp))
+                            axios.post(sendMsgAPI, temp, {
+                                headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+                            }).then(res => {
+                                resCount += 1;
+                                if (res.data.success === true) {
+                                    successCount += 1;
+                                }
+                                if (this.tableDataprocessing.length === resCount) {
+                                    ElNotification({
+                                        title: '发送信息',
+                                        message: '已发送' + successCount + '条信息',
+                                        type: 'warning',
+                                    })
+                                    loading.close();
+                                }
+                            }).catch(error => {
+                                ElNotification({
+                                    title: 'error',
+                                    message: error,
+                                    type: 'error',
+                                })
+                                loading.close();
+                            })
+
+                        }
+                    } else {
+                        ElNotification({
+                            title: '发送信息',
+                            message: '处理中工单为空，请搜索要发送的工单哦~',
+                            type: 'warning',
+                        })
+                    }
+                    break;
+                }
+                default: {
+                    ElNotification({
+                        title: '发送信息',
+                        message: '请选择待处理或处理中工单~',
+                        type: 'warning',
+                    })
+                    break;
+                }
+            }
+            this.drawersendMsg = false;
+        },
     },
     mounted() {
     }
@@ -2166,11 +2395,12 @@ export default {
 
 
 <style scoped>
-.icon{
+.icon {
     margin-right: 3px;
     width: 1.2em;
     height: 1.2em;
 }
+
 .mx-1 {
     font-size: 16px;
     font-weight: 500;
@@ -2208,13 +2438,12 @@ export default {
     padding-left: 8px;
     padding-top: 8px;
     padding-bottom: 8px;
-    margin-top:0; 
+    margin-top: 0;
     color: #ffffff;
-    font-weight:bold;
+    font-weight: bold;
 }
 
 .orderquery .el-col {
     padding-left: 10px;
     padding-right: 10px;
-}
-</style>
+}</style>
