@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "best",
     "description": "best chrome extension",
-    "version": "1.0.5",
+    "version": "1.0.8",
     "background": {
         "scripts": [
             "/background.js"

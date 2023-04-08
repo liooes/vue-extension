@@ -2110,99 +2110,116 @@ export default {
         chanageTodayFollowTypeconfirmClick() {
             console.log('抽屉打开 按下确定修改工单状态')
             console.log('当前选中', chanageTodayFollowType.value)
-            switch (activeTabs.value) {
-                //待处理
-                case 'c': {
-                    //表格有数据才可以修改
-                    if (this.tableDatawaitprocess.length > 0) {
-                        // const loading = ElLoading.service(loadingoptions);
-                        var successCount = 0;
-                        var resCount = 0;
-                        //遍历表格发送
-                        for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
-                            //设置要发送的数据
-                            var temp = {
-                                id: this.tableDatawaitprocess[i].id,
-                                todayFollowProgress: chanageTodayFollowType.value
-                            }
-                            axios.post(chanageTodayFollowTypeAPI, qs.stringify(temp), {
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded'
-                                }
-                            }).then(res => {
-                                resCount += 1;
-                                if (res.data.success === true) {
-                                    successCount += 1;
-                                }
-                                if (resCount === this.tableDatawaitprocess.length) {
-                                    // loading.close();
-                                    ElNotification({
-                                        title: '修改工单进展',
-                                        message: '已修改' + successCount + '条为：' + chanageTodayFollowType.value
+            ElMessageBox.confirm(
+                '是否确定修改状态?',
+                '提示',
+                {
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'cancel',
+                    type: 'warning',
+                }
+            ).then(() => {
+                    switch (activeTabs.value) {
+                        //待处理
+                        case 'c': {
+                            //表格有数据才可以修改
+                            if (this.tableDatawaitprocess.length > 0) {
+                                // const loading = ElLoading.service(loadingoptions);
+                                var successCount = 0;
+                                var resCount = 0;
+                                //遍历表格发送
+                                for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
+                                    //设置要发送的数据
+                                    var temp = {
+                                        id: this.tableDatawaitprocess[i].id,
+                                        todayFollowProgress: chanageTodayFollowType.value
+                                    }
+                                    axios.post(chanageTodayFollowTypeAPI, qs.stringify(temp), {
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        }
+                                    }).then(res => {
+                                        resCount += 1;
+                                        if (res.data.success === true) {
+                                            successCount += 1;
+                                        }
+                                        if (resCount === this.tableDatawaitprocess.length) {
+                                            // loading.close();
+                                            ElNotification({
+                                                title: '修改工单进展',
+                                                message: '已修改' + successCount + '条为：' + chanageTodayFollowType.value
+                                            })
+                                        }
+                                    }).catch(error => {
+                                        console.log(error)
+                                        ElNotification({
+                                            title: 'error',
+                                            message: error,
+                                            type: 'warning'
+                                        })
+                                        // loading.close();
                                     })
+                                    console.log('要发送的数据', qs.stringify(temp))
                                 }
-                            }).catch(error => {
-                                console.log(error)
-                                ElNotification({
-                                    title: 'error',
-                                    message: error,
-                                    type: 'warning'
-                                })
-                                // loading.close();
-                            })
-                            console.log('要发送的数据', qs.stringify(temp))
-                        }
 
-                    } else {
-                        ElNotification({ title: '修改工单进展', message: '待处理表格数据为空,请搜索要修改的工单哦~', type: 'warning' })
-                    }
-                    break;
-                }
-                //处理中
-                case 'd': {
-                    //表格有数据才可以修改
-                    if (this.tableDataprocessing.length > 0) {
-                        // const loading = ElLoading.service(loadingoptions);
-                        var successCount = 0;
-                        var resCount = 0;
-                        //遍历表格发送
-                        for (let i = 0; i < this.tableDataprocessing.length; i++) {
-                            //设置要发送的数据
-                            var temp = {
-                                id: this.tableDataprocessing[i].id,
-                                todayFollowProgress: chanageTodayFollowType.value
+                            } else {
+                                ElNotification({ title: '修改工单进展', message: '待处理表格数据为空,请搜索要修改的工单哦~', type: 'warning' })
                             }
-                            //发送请求
-                            axios.post(chanageTodayFollowTypeAPI, qs.stringify(temp), {
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded'
-                                }
-                            }).then(res => {
-                                resCount += 1;
-                                if (res.data.success === true) {
-                                    successCount += 1;
-                                }
-                                if (resCount === this.tableDataprocessing.length) {
-                                    // loading.close();
-                                    ElNotification({ title: '修改工单进展', message: '已修改' + successCount + '条为：' + chanageTodayFollowType.value })
-                                }
-                            }).catch(error => {
-                                console.log(error)
-                                ElNotification({ title: 'error', message: error, type: 'warning' })
-                                // loading.close();
-                            })
-                            console.log('要发送的数据', qs.stringify(temp))
+                            break;
                         }
-                    } else {
-                        ElNotification({ title: '修改工单进展', message: '处理中表格数据为空,请搜索要修改的工单哦~', type: 'warning' })
+                        //处理中
+                        case 'd': {
+                            //表格有数据才可以修改
+                            if (this.tableDataprocessing.length > 0) {
+                                // const loading = ElLoading.service(loadingoptions);
+                                var successCount = 0;
+                                var resCount = 0;
+                                //遍历表格发送
+                                for (let i = 0; i < this.tableDataprocessing.length; i++) {
+                                    //设置要发送的数据
+                                    var temp = {
+                                        id: this.tableDataprocessing[i].id,
+                                        todayFollowProgress: chanageTodayFollowType.value
+                                    }
+                                    //发送请求
+                                    axios.post(chanageTodayFollowTypeAPI, qs.stringify(temp), {
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        }
+                                    }).then(res => {
+                                        resCount += 1;
+                                        if (res.data.success === true) {
+                                            successCount += 1;
+                                        }
+                                        if (resCount === this.tableDataprocessing.length) {
+                                            // loading.close();
+                                            ElNotification({ title: '修改工单进展', message: '已修改' + successCount + '条为：' + chanageTodayFollowType.value })
+                                        }
+                                    }).catch(error => {
+                                        console.log(error)
+                                        ElNotification({ title: 'error', message: error, type: 'warning' })
+                                        // loading.close();
+                                    })
+                                    console.log('要发送的数据', qs.stringify(temp))
+                                }
+                            } else {
+                                ElNotification({ title: '修改工单进展', message: '处理中表格数据为空,请搜索要修改的工单哦~', type: 'warning' })
+                            }
+                            break;
+                        }
+                        default: {
+                            ElNotification({ title: '修改工单进展', message: '请选择待处理或处理中工单', type: 'warning' })
+                            break;
+                        }
                     }
-                    break;
-                }
-                default: {
-                    ElNotification({ title: '修改工单进展', message: '请选择待处理或处理中工单', type: 'warning' })
-                    break;
-                }
-            }
+            }).catch(error => {
+                    ElMessage({
+                        type: 'error',
+                        message: error,
+                    })
+                     //执行完任务后关闭抽屉
+                    this.drawerchanageTodayFollowType = false;
+                })
             //执行完任务后关闭抽屉
             this.drawerchanageTodayFollowType = false;
         },

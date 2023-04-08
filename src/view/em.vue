@@ -10,7 +10,7 @@
     <el-container class="page-body">
       <!-- 左侧导航 -->
       <el-aside class="page-aside" width="200px">
-        <el-menu active-text-color="#ffd04b" background-color="#4C4F53" class="el-menu" default-active="1"
+        <el-menu active-text-color="#ffd04b" background-color="#4C4F53" class="el-menu" default-active="3"
           text-color="#fff" @select="handleSelect">
           <el-menu-item index="1">
             <el-icon>
@@ -22,11 +22,11 @@
             <el-icon><Aim /></el-icon>
             <span>异常检测</span>
           </el-menu-item>
-          <el-menu-item index="3" disabled>
+          <el-menu-item index="3" >
             <el-icon><Coffee /></el-icon>
             <span>物流查询</span>
           </el-menu-item>
-          <el-menu-item index="4" disabled>
+          <el-menu-item index="4" >
             <el-icon><Grid /></el-icon>
             <span>数据看板</span>
           </el-menu-item>
@@ -51,16 +51,19 @@
 import b2c from './b2c.vue';
 import setting from './setting.vue';
 import anomalyDetection from './anomalyDetection.vue';
+import expressQuery from './expressQuery.vue';
+import dataBoard from './dataBoard.vue';
+
 
 export default {
   data() {
     return {
-      activeIndex: '1',
+      activeIndex: '3',
       compName: ''
     };
   },
   mounted() {
-    this.compName = b2c
+    this.compName = expressQuery
   },
   methods: {
     handleSelect(index) {
@@ -72,10 +75,10 @@ export default {
           this.compName = anomalyDetection
           break
         case '3':
-          // this.compName = setting
+          this.compName = expressQuery
           break
         case '4':
-          // this.compName = setting
+          this.compName = dataBoard
           break
         case '5':
           this.compName = setting
