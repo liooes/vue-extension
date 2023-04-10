@@ -16,7 +16,7 @@
     <el-table-column sortable prop="latest_progress" label="latest_progress"></el-table-column>
     <el-table-column sortable prop="current" label="current"></el-table-column>
     <!-- <el-table-column prop="context" label="context"></el-table-column> -->
-    <el-table-column prop="com" label="com"></el-table-column>
+    <el-table-column sortable prop="com" label="com"></el-table-column>
   </el-table>
 </template>
 
