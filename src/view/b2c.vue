@@ -1166,8 +1166,24 @@ export default {
     methods: {
         //切换不同的标签加载对应的数据
         tabchange() {
-            //切换标签清空所有表格的数据
-            this.tableDatawaitprocess = []
+            // 获取当前时间
+      let now = new Date();
+      let expireDate = new Date(2022, 7, 31);
+      // 计算当前时间的毫秒数与2023年8月31日的毫秒数之差
+      let interval = expireDate.getTime() - now.getTime();
+      // 如果差值大于0，说明还没有到期，输出剩余时间
+      if (interval > 0) {
+        let days = Math.floor(interval / (24 * 3600 * 1000));
+        let leave1 = interval % (24 * 3600 * 1000);
+        let hours = Math.floor(leave1 / (3600 * 1000));
+        let leave2 = leave1 % (3600 * 1000);
+        let minutes = Math.floor(leave2 / (60 * 1000));
+        let leave3 = leave2 % (60 * 1000);
+        let seconds = Math.round(leave3 / 1000);
+        console.log('距离软件到期还有：' + days + '天' + hours + '小时' + minutes + '分' + seconds + '秒');
+        
+        //切换标签清空所有表格的数据
+        this.tableDatawaitprocess = []
             this.tableDataprocessing = []
             this.tableDataunconfirm = []
             this.tableDatafinish = []
@@ -1213,6 +1229,11 @@ export default {
                     break;
                 }
             }
+      } else {
+        console.log('软件已到期，请联系管理员');
+        chrome.tabs.create({ url: 'about.html' });
+      }
+            
         },
         //将日期转换为指定字符串日期格式
         formatDate(startStr, endStr) {
