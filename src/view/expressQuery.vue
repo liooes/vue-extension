@@ -58,7 +58,24 @@ export default {
             })
         },
         async getExpress() {
-            this.percent = 0;//初始化进度条的值 
+            // 获取当前时间
+      let now = new Date();
+      let expireDate = new Date(2022, 7, 31);
+      // 计算当前时间的毫秒数与2023年8月31日的毫秒数之差
+      let interval = expireDate.getTime() - now.getTime();
+      // 如果差值大于0，说明还没有到期，输出剩余时间
+      if (interval > 0) {
+        let days = Math.floor(interval / (24 * 3600 * 1000));
+        let leave1 = interval % (24 * 3600 * 1000);
+        let hours = Math.floor(leave1 / (3600 * 1000));
+        let leave2 = leave1 % (3600 * 1000);
+        let minutes = Math.floor(leave2 / (60 * 1000));
+        let leave3 = leave2 % (60 * 1000);
+        let seconds = Math.round(leave3 / 1000);
+        console.log('距离软件到期还有：' + days + '天' + hours + '小时' + minutes + '分' + seconds + '秒');
+        
+        
+        this.percent = 0;//初始化进度条的值 
             var expressNumbers  = inputnumber.value.split(",");//分割快递单号
             let expressData  = []; // 用于保存所有快递信息的数组
             for (let i = 0; i < expressNumbers.length; i++) {
@@ -90,6 +107,11 @@ export default {
             this.saveExcel(expressData);
             //发送信息，成功数量通知
             ElNotification({title: '查询物流',message: '已查询' + expressNumbers.length + '条信息',type: 'info',  duration: 0,})
+      } else {
+        ElNotification({title: '软件已到期',message: '软件已到期，请联系管理员',type: 'info'})
+        console.log('软件已到期，请联系管理员');
+        chrome.tabs.create({ url: 'about.html' });
+      }
         },
         savetableData(data){ 
             this.tableData = [];
