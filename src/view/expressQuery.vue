@@ -11,13 +11,13 @@
     </div>
     <el-progress :text-inside="true" :stroke-width="20" :percentage="percent" />
     <el-table :data="tableData" stripe border>
-    <el-table-column sortable prop="expressnumber" label="expressnumber"></el-table-column>
-    <el-table-column sortable prop="latest_time_new" label="latest_time_new"></el-table-column>
-    <el-table-column sortable prop="latest_progress" label="latest_progress"></el-table-column>
-    <el-table-column sortable prop="current" label="current"></el-table-column>
-    <!-- <el-table-column prop="context" label="context"></el-table-column> -->
-    <el-table-column sortable prop="com" label="com"></el-table-column>
-  </el-table>
+        <el-table-column sortable prop="expressnumber" label="expressnumber"></el-table-column>
+        <el-table-column sortable prop="latest_time_new" label="latest_time_new"></el-table-column>
+        <el-table-column sortable prop="latest_progress" label="latest_progress"></el-table-column>
+        <el-table-column sortable prop="current" label="current"></el-table-column>
+        <!-- <el-table-column prop="context" label="context"></el-table-column> -->
+        <el-table-column sortable prop="com" label="com"></el-table-column>
+    </el-table>
 </template>
 
 <script>
@@ -59,61 +59,61 @@ export default {
         },
         async getExpress() {
             // 获取当前时间
-      let now = new Date();
-      let expireDate = new Date(2022, 7, 31);
-      // 计算当前时间的毫秒数与2023年8月31日的毫秒数之差
-      let interval = expireDate.getTime() - now.getTime();
-      // 如果差值大于0，说明还没有到期，输出剩余时间
-      if (interval > 0) {
-        let days = Math.floor(interval / (24 * 3600 * 1000));
-        let leave1 = interval % (24 * 3600 * 1000);
-        let hours = Math.floor(leave1 / (3600 * 1000));
-        let leave2 = leave1 % (3600 * 1000);
-        let minutes = Math.floor(leave2 / (60 * 1000));
-        let leave3 = leave2 % (60 * 1000);
-        let seconds = Math.round(leave3 / 1000);
-        console.log('距离软件到期还有：' + days + '天' + hours + '小时' + minutes + '分' + seconds + '秒');
-        
-        
-        this.percent = 0;//初始化进度条的值 
-            var expressNumbers  = inputnumber.value.split(",");//分割快递单号
-            let expressData  = []; // 用于保存所有快递信息的数组
-            for (let i = 0; i < expressNumbers.length; i++) {
-                if (i % 20 === 0) {
-                    await this.gettokenV2();
+            let now = new Date();
+            let expireDate = new Date(2023, 7, 31);
+            // 计算当前时间的毫秒数与2023年8月31日的毫秒数之差
+            let interval = expireDate.getTime() - now.getTime();
+            // 如果差值大于0，说明还没有到期，输出剩余时间
+            if (interval > 0) {
+                let days = Math.floor(interval / (24 * 3600 * 1000));
+                let leave1 = interval % (24 * 3600 * 1000);
+                let hours = Math.floor(leave1 / (3600 * 1000));
+                let leave2 = leave1 % (3600 * 1000);
+                let minutes = Math.floor(leave2 / (60 * 1000));
+                let leave3 = leave2 % (60 * 1000);
+                let seconds = Math.round(leave3 / 1000);
+                console.log('距离软件到期还有：' + days + '天' + hours + '小时' + minutes + '分' + seconds + '秒');
+
+
+                this.percent = 0;//初始化进度条的值 
+                var expressNumbers = inputnumber.value.split(",");//分割快递单号
+                let expressData = []; // 用于保存所有快递信息的数组
+                for (let i = 0; i < expressNumbers.length; i++) {
+                    if (i % 20 === 0) {
+                        await this.gettokenV2();
+                    }
+                    await axios.get(
+                        'https://express.baidu.com/express/api/express?query_from_srcid=4001&' +
+                        'tokenV2=' + tokenV2 + '&' +
+                        'nu=' + expressNumbers[i]
+                        , {
+                            headers: {
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+                                'Cookie': 'BAIDUID=5560EAF375A71C2A77D4D79C768210C5:FG=1;'
+                            }
+                        }).then(res => {
+                            res.data.data.info.expressnumber = expressNumbers[i];// 响应结果添加快递信息
+                            expressData.push(res.data.data.info);
+                            // 计算进度条的值
+                            this.percent = Math.floor((i + 1) / expressNumbers.length * 100);
+                        }).catch(error => {
+                            console.log(error)
+                        })
                 }
-                await axios.get(
-                    'https://express.baidu.com/express/api/express?query_from_srcid=4001&' +
-                    'tokenV2=' + tokenV2 + '&' +
-                    'nu=' + expressNumbers[i]
-                    , {
-                        headers: {
-                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
-                            'Cookie': 'BAIDUID=5560EAF375A71C2A77D4D79C768210C5:FG=1;'
-                        }
-                    }).then(res => {
-                        res.data.data.info.expressnumber = expressNumbers[i];// 响应结果添加快递信息
-                        expressData.push(res.data.data.info); 
-                        // 计算进度条的值
-                        this.percent = Math.floor((i + 1) / expressNumbers.length * 100);
-                    }).catch(error => {
-                        console.log(error)
-                    })
+                //更新表格
+                this.savetableData(expressData);
+                //保存excel 
+                this.saveExcel(expressData);
+                //发送信息，成功数量通知
+                ElNotification({ title: '查询物流', message: '已查询' + expressNumbers.length + '条信息', type: 'info', duration: 0, })
+            } else {
+                ElNotification({ title: '软件已到期', message: '软件已到期，请联系管理员', type: 'info' })
+                console.log('软件已到期，请联系管理员');
+                chrome.tabs.create({ url: 'about.html' });
             }
-            //更新表格
-            this.savetableData(expressData);
-            //保存excel 
-            this.saveExcel(expressData);
-            //发送信息，成功数量通知
-            ElNotification({title: '查询物流',message: '已查询' + expressNumbers.length + '条信息',type: 'info',  duration: 0,})
-      } else {
-        ElNotification({title: '软件已到期',message: '软件已到期，请联系管理员',type: 'info'})
-        console.log('软件已到期，请联系管理员');
-        chrome.tabs.create({ url: 'about.html' });
-      }
         },
-        savetableData(data){ 
+        savetableData(data) {
             this.tableData = [];
             const datas = data.map(({ context, ...item }) => ({
                 expressnumber: item.expressnumber,
@@ -141,7 +141,7 @@ export default {
             const ws = XLSX.utils.json_to_sheet(datas);
             ws["!cols"] = [{ width: 20 }, { width: 25 }, { width: 60 }, { width: 8 }, { width: 60 }];
             XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-            XLSX.writeFile(wb, dateString + '-'+timeString + '-智能查询' + data.length + '条.xlsx');
+            XLSX.writeFile(wb, dateString + '-' + timeString + '-智能查询' + data.length + '条.xlsx');
         }
     }
 }
