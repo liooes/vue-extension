@@ -19,7 +19,7 @@ export default {
     newtab() {
       // 获取当前时间
       let now = new Date();
-      let expireDate = new Date(2022, 7, 31);
+      let expireDate = new Date(2023, 7, 31);
       // 计算当前时间的毫秒数与2023年8月31日的毫秒数之差
       let interval = expireDate.getTime() - now.getTime();
       // 如果差值大于0，说明还没有到期，输出剩余时间

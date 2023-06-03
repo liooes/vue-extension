@@ -71,12 +71,6 @@
                 <el-row>
                     <el-col>
                         <el-form-item class="btn">
-                            <!-- <el-button color="#dd2c00" :icon="Edit">发送信息</el-button>
-                            <el-button color="#212121" @click="drawerchangeIssue = true">修改类型</el-button>
-                            <el-button color="#056f00">完结工单</el-button>
-                            <el-button color="#4527a0">重开工单</el-button>
-                            <el-button color="#ad1457">修改状态</el-button>
-                            <el-button color="#6a1b9a" :icon="Search"   @click="searchOrder">搜索工单</el-button> -->
                             <el-button type="primary" @click="opendrawersendMsg">
                                 <ChatLineRound class="icon" /> 发送信息
                             </el-button>
@@ -91,6 +85,9 @@
                             </el-button>
                             <el-button type="primary" @click="draweropendrawerchanageTodayFollowType">
                                 <Edit class="icon" />修改状态
+                            </el-button>
+                            <el-button type="primary" @click="HandoverToRobot">
+                                <UserFilled class="icon" />转交链儿
                             </el-button>
                             <el-button type="primary" @click="searchOrder">
                                 <Search class="icon" />搜索工单
@@ -368,10 +365,11 @@ const activeTabs = ref('c')
 //表格显示数量
 const pagesize = ref('')
 const pagesizeOptions = [
-    { value: 10, label: '10' },
-    { value: 100, label: '100' },
     { value: 500, label: '500' },
 ]
+
+// { value: 10, label: '10' },
+//     { value: 100, label: '100' },
 
 //工单状态数量列表
 //下标值：我的关注，已挂起，待处理，处理中，判责中，已完结
@@ -492,6 +490,8 @@ const chanageTodayFollowTypeAPI = 'https://newem.800best.com/ajax/em/chanageToda
 const sendMsgAPI = 'https://newem.800best.com/ajax/em/servicer/sendMsg';
 //更新工单状态API
 const updateStatusAPI = 'https://newem.800best.com/ajax/em/updateStatus';
+//转交链儿API
+const servicerToRobotAPI = 'https://newem.800best.com/ajax/em/servicerToRobot';
 
 //获取工单数量请求数据
 const getNumListData = {
@@ -1145,9 +1145,6 @@ export default {
             shortcuts: pkvla,
         }
     },
-    // components:{
-    //     Search
-    // },
     created() {
         //设置默认选中值
         this.createtime = this.createtimedefaultvalue;
@@ -1168,7 +1165,7 @@ export default {
         tabchange() {
             // 获取当前时间
       let now = new Date();
-      let expireDate = new Date(2022, 7, 31);
+      let expireDate = new Date(2023, 7, 31);
       // 计算当前时间的毫秒数与2023年8月31日的毫秒数之差
       let interval = expireDate.getTime() - now.getTime();
       // 如果差值大于0，说明还没有到期，输出剩余时间
@@ -2425,6 +2422,117 @@ export default {
             }
             this.drawersendMsg = false;
         },
+        //转交链儿
+        HandoverToRobot(){
+            ElMessageBox.confirm(
+                '是否确定转交链儿?',
+                '提示',
+                {
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'cancel',
+                    type: 'info',
+                }
+            ).then(() => {
+                    switch (activeTabs.value) {
+                        //待处理
+                        case 'c': {
+                            //表格有数据才可以修改
+                            if (this.tableDatawaitprocess.length > 0) {
+                                // const loading = ElLoading.service(loadingoptions);
+                                var successCount = 0;
+                                var resCount = 0;
+                                //遍历表格发送
+                                for (let i = 0; i < this.tableDatawaitprocess.length; i++) {
+                                    //设置要发送的数据
+                                    var temp = {
+                                        id: this.tableDatawaitprocess[i].id,
+                                        /*todayFollowProgress: chanageTodayFollowType.value*/
+                                    }
+                                    axios.post(servicerToRobotAPI, qs.stringify(temp), {
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        }
+                                    }).then(res => {
+                                        resCount += 1;
+                                        if (res.data.success === true) {
+                                            successCount += 1;
+                                        }
+                                        if (resCount === this.tableDatawaitprocess.length) {
+                                            // loading.close();
+                                            ElNotification({
+                                                title: '转交链儿',
+                                                message: '已转交' + successCount + '条为链儿'
+                                            })
+                                        }
+                                    }).catch(error => {
+                                        console.log(error)
+                                        ElNotification({
+                                            title: 'error',
+                                            message: error,
+                                            type: 'warning'
+                                        })
+                                        // loading.close();
+                                    })
+                                    console.log('要发送的数据', qs.stringify(temp))
+                                }
+
+                            } else {
+                                ElNotification({ title: '转交链儿', message: '待处理表格数据为空,请搜索要转交的工单哦~', type: 'warning' })
+                            }
+                            break;
+                        }
+                        //处理中
+                        case 'd': {
+                            //表格有数据才可以修改
+                            if (this.tableDataprocessing.length > 0) {
+                                // const loading = ElLoading.service(loadingoptions);
+                                var successCount = 0;
+                                var resCount = 0;
+                                //遍历表格发送
+                                for (let i = 0; i < this.tableDataprocessing.length; i++) {
+                                    //设置要发送的数据
+                                    var temp = {
+                                        id: this.tableDataprocessing[i].id,
+                                        /*todayFollowProgress: chanageTodayFollowType.value*/
+                                    }
+                                    //发送请求
+                                    axios.post(servicerToRobotAPI, qs.stringify(temp), {
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded'
+                                        }
+                                    }).then(res => {
+                                        resCount += 1;
+                                        if (res.data.success === true) {
+                                            successCount += 1;
+                                        }
+                                        if (resCount === this.tableDataprocessing.length) {
+                                            // loading.close();
+                                            ElNotification({ title: '转交链儿', message: '已转交' + successCount + '条为链儿'})
+                                        }
+                                    }).catch(error => {
+                                        console.log(error)
+                                        ElNotification({ title: 'error', message: error, type: 'warning' })
+                                        // loading.close();
+                                    })
+                                    console.log('要发送的数据', qs.stringify(temp))
+                                }
+                            } else {
+                                ElNotification({ title: '转交链儿', message: '处理中表格数据为空,请搜索要转交的工单哦~', type: 'warning' })
+                            }
+                            break;
+                        }
+                        default: {
+                            ElNotification({ title: '转交链儿', message: '请选择待处理或处理中工单', type: 'warning' })
+                            break;
+                        }
+                    }
+            }).catch(error => {
+                    ElMessage({
+                        type: 'error',
+                        message: error,
+                    })
+                })
+        }
     },
     mounted() {
     }
